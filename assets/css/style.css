@@ -140,6 +140,51 @@ h1,h2,h3,h4,h5,h6 {
 /* サムネ非表示（ホームでは視線をテキストに集中させる） */
 #home-list .thumb { display: none; }
 
+#home-list #latest-album .thumb,
+#home-list #latest-album img.thumb {
+  display: block;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  float: left;
+  margin-right: 12px;
+  border-radius: 6px;
+}
+
+/* preview 内のテキストがサムネに回り込むように微調整 */
+#home-list #latest-album .preview {
+  margin-left: 0; /* inline markup で float を使っているため余分な左マージンは避ける */
+  overflow: hidden; /* float 解除の保険 */
+}
+
+/* ====== Discography list: larger album thumbnails ====== */
+/* discography ページ内のカード中のサムネを大きくする（#discography-list を想定） */
+#discography-list .card img.thumb,
+#discography-list .card .thumb {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0; /* フレックスレイアウト内でも縮まないように */
+}
+
+/* card 内のレイアウトが崩れないように、img を左に寄せるルール（既存の inline style と併用されてもOK）*/
+#discography-list .card > div { align-items: center; }
+
+/* スマホでは画像をやや小さく */
+@media (max-width: 520px) {
+  #home-list #latest-album .thumb,
+  #home-list #latest-album img.thumb {
+    width: 96px;
+    height: 96px;
+  }
+  #discography-list .card img.thumb,
+  #discography-list .card .thumb {
+    width: 120px;
+    height: 120px;
+  }
+}
+
 /* モバイル調整 */
 @media (max-width:520px){
   #home-list .item { padding: 0.8rem 0; }
