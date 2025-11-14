@@ -282,7 +282,7 @@ const main = (function () {
       container.innerHTML = items.map(a => `
         <article class="card">
           <div style="display:flex;gap:1rem;align-items:center;">
-            <img src="${thumbOrPlaceholder(a.cover,140,140)}" alt="" class="thumb" style="width:120px;height:120px">
+            <img src="${thumbOrPlaceholder(a.cover,140,140)}" alt="" class="thumb">
             <div>
               <h3><a href="album.html?id=${a.id}">${escapeHtml(a.title)}</a></h3>
               <div class="meta-small">参加アーティスト: ${escapeHtml((a.artists||[]).join(', ') || '未設定')}</div>
@@ -369,7 +369,7 @@ const main = (function () {
       const setlistHtml = (item.setlist || []).map((s, idx) => {
         const found = (musicData.items||[]).find(m => m.id === s.id || m.title === s.title);
         if (found) {
-          return `<li>${idx+1}. <a href="track.html?id=${found.id}">${escapeHtml(found.title)}</a></li>`;
+          return `<li>${idx+1}. <a href="tfrack.html?id=${found.id}">${escapeHtml(found.title)}</a></li>`;
         } else {
           return `<li>${idx+1}. ${escapeHtml(s.title || s)}</li>`;
         }
