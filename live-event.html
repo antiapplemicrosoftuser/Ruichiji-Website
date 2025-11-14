@@ -1,0 +1,13 @@
+---
+layout: default
+title: Live Event
+---
+
+<div id="live-item"></div>
+<p><a href="{{ '/live.html' | relative_url }}">← Live一覧に戻る</a></p>
+
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    if (window.main) main.renderLivePage('#live-item');
+  });
+</script>

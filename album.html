@@ -1,0 +1,13 @@
+---
+layout: default
+title: Album
+---
+
+<div id="album-item"></div>
+<p><a href="{{ '/discography.html' | relative_url }}">← Discography一覧に戻る</a></p>
+
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    if (window.main) main.renderAlbumPage('#album-item');
+  });
+</script>

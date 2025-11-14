@@ -1,0 +1,24 @@
+{
+  "items": [
+    {
+      "id": "v2025-07-mv-hoshi",
+      "date": "2025-07-15",
+      "title": "『星の航海』Music Video",
+      "service": "YouTube",
+      "uploader": "Official Channel",
+      "video": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "description": "最新シングル『星の航海』のミュージックビデオ。"
+    },
+    {
+      "id": "v2024-12-liveclip",
+      "date": "2024-12-20",
+      "title": "Live Clip 2024",
+      "service": "ニコニコ動画",
+      "uploader": "Official",
+      "video": "https://www.nicovideo.jp/watch/sm12345678",
+      "url": "https://www.nicovideo.jp/watch/sm12345678",
+      "description": "2024年ツアーのハイライト映像。"
+    }
+  ]
+}

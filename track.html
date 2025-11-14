@@ -1,0 +1,13 @@
+---
+layout: default
+title: Track
+---
+
+<div id="track-item"></div>
+<p><a href="{{ '/music.html' | relative_url }}">← Music一覧に戻る</a></p>
+
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    if (window.main) main.renderTrackPage('#track-item');
+  });
+</script>

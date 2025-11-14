@@ -1,0 +1,29 @@
+{
+  "items": [
+    {
+      "id": "l2025-10-one-man",
+      "title": "ワンマンライブ 2025",
+      "date": "2025-10-05 19:00",
+      "venue": "東京・STUDIO HALL",
+      "image": "https://via.placeholder.com/1200x400?text=Live+2025",
+      "note": "スペシャルゲストを迎えたワンマンライブ。写真とセットリストを公開しています。",
+      "setlist": [
+        { "title": "星の航海", "id": "m001-hoshinokoukai" },
+        { "title": "Ambient Sky", "id": "m002-ambient-sky" },
+        { "title": "アンコール" }
+      ]
+    },
+    {
+      "id": "l2024-mini",
+      "title": "ミニライブ 2024",
+      "date": "2024-12-12 18:30",
+      "venue": "大阪・Live House",
+      "image": "https://via.placeholder.com/1200x400?text=Mini+Live+2024",
+      "note": "アコースティック編成でのミニライブ。",
+      "setlist": [
+        { "title": "Night Tide" },
+        { "title": "Ambient Sky", "id": "m002-ambient-sky" }
+      ]
+    }
+  ]
+}

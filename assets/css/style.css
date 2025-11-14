@@ -1,0 +1,193 @@
+/* Dark mode style — Header size matched to Version1 */
+:root{
+  --accent:#64b5f6;
+  --muted:#9aa4b2;
+  --bg:#071019;
+  --card:#0f1720;
+  --surface:#0b1620;
+  --border:#162330;
+  --text:#e6eef6;
+  --muted-2:#b6c2cc;
+  --max-width:1100px;
+  --header-height:64px; /* 初期値（JS が実測で上書き） */
+  font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "メイリオ", Meiryo, sans-serif;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:linear-gradient(180deg,var(--bg),#031219 120%);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.6;
+  padding-top: var(--header-height);
+  transition: background-color .2s, color .2s;
+}
+
+/* ハッシュ遷移用パディング（ヘッダー高さそのまま） */
+html {
+  scroll-padding-top: var(--header-height);
+}
+[id], [name] {
+  scroll-margin-top: calc(var(--header-height) + 0.5rem);
+}
+h1,h2,h3,h4,h5,h6 {
+  scroll-margin-top: calc(var(--header-height) + 0.5rem);
+}
+
+.container{
+  max-width:var(--max-width);
+  margin:0 auto;
+  padding:1rem;
+}
+
+/* 固定ヘッダー（Version1 相当の高さ） */
+.site-header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:1000;
+  background:linear-gradient(90deg, rgba(15,23,32,0.92), rgba(11,22,30,0.86));
+  border-bottom:1px solid rgba(255,255,255,0.03);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(3,6,10,0.6);
+}
+.site-header .container{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  height:auto;
+  padding:0.6rem 1rem; /* Version1 と同じ */
+}
+
+/* サイトタイトル Ruichiji - Version1 相当 */
+.site-title{
+  margin:0;
+  font-size:1.05rem;     /* Version1 のサイズ */
+  font-weight:700;
+  letter-spacing:0.2px;
+  white-space:nowrap;
+  color:var(--text);
+  text-decoration:none; /* 下線なし */
+  display:inline-block;
+}
+
+/* メニューバー */
+.main-nav{
+  margin-left:auto;
+  display:flex;
+  gap:.25rem;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.main-nav a{
+  color:var(--muted);
+  text-decoration:none;
+  padding:.45rem .6rem;
+  border-radius:8px;
+  font-size:.95rem;
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  transition: color .12s, background-color .12s, transform .06s;
+}
+.main-nav a:hover{
+  color:var(--accent);
+  background:rgba(100,181,246,0.06);
+  transform:translateY(-1px);
+}
+.main-nav a.active{
+  color:var(--accent);
+  background:linear-gradient(90deg, rgba(58,160,255,0.08), rgba(100,181,246,0.04));
+  box-shadow: inset 0 -2px 0 rgba(58,160,255,0.06);
+}
+
+/* Grid & Lists */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1rem;
+  margin-top:1rem;
+}
+.card{
+  background:linear-gradient(180deg,var(--card), var(--surface));
+  padding:1rem;
+  border-radius:10px;
+  box-shadow: 0 4px 18px rgba(2,6,12,0.6);
+  border: 1px solid var(--border);
+}
+.list{
+  margin-top:1rem;
+}
+.preview{margin:0.5rem 0}
+
+/* list items */
+.item{
+  display:flex;
+  gap:1rem;
+  padding:.75rem 0;
+  border-bottom:1px dashed rgba(255,255,255,0.03);
+}
+.item:last-child{border-bottom:none}
+.item .meta{
+  min-width:110px;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+/* Card image (album thumbnail) */
+.thumb{
+  width:96px;
+  height:96px;
+  flex-shrink:0;
+  background:linear-gradient(180deg,#09202b,#051018);
+  border-radius:8px;
+  object-fit:cover;
+  border:1px solid rgba(255,255,255,0.04);
+}
+
+/* small utilities */
+.more{display:inline-block;margin-top:.5rem;color:var(--accent);text-decoration:none}
+.meta-small{color:var(--muted-2);font-size:.9rem}
+.kicker{color:var(--accent);font-weight:700}
+.site-footer{padding:1rem 0;border-top:1px solid rgba(255,255,255,0.02);margin-top:2rem;background:transparent}
+a{color:var(--accent)}
+a:visited{color:rgba(100,181,246,0.8)}
+code{background:#03181f;padding:.1rem .3rem;border-radius:4px;font-family:monospace;font-size:.9rem;color:var(--muted-2)}
+
+/* audio / iframe の背景調整（ダークに馴染ませる） */
+audio, iframe {
+  background: transparent;
+  color: var(--text);
+}
+
+/* main top margin */
+main.container{
+  margin-top:0.5rem;
+}
+
+/* responsiveness tweaks */
+@media (max-width:920px){
+  :root{--header-height:72px}
+  .site-header .container{padding:.6rem .8rem}
+  .site-title{font-size:1.0rem}
+}
+@media (max-width:520px){
+  :root{--header-height:96px}
+  .site-header .container{flex-direction:column;align-items:flex-start;gap:.5rem;padding:.7rem}
+  .main-nav{margin-left:0;width:100%;gap:.25rem}
+  .main-nav a{font-size:.95rem;padding:.5rem .6rem}
+  .site-title{font-size:0.98rem}
+}
+
+/* Accessibility: focus styles */
+a:focus, .main-nav a:focus {
+  outline: 3px solid rgba(100,181,246,0.18);
+  outline-offset: 2px;
+  border-radius:6px;
+}
+
+hr { border: none; border-top:1px solid rgba(255,255,255,0.03); margin:1rem 0; }

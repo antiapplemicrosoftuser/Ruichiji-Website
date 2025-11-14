@@ -1,0 +1,48 @@
+---
+layout: default
+title: Home
+---
+
+<section id="latest-grid" class="grid">
+  <article class="card">
+    <h2>Topics（最新）</h2>
+    <div id="latest-topics" class="preview"></div>
+    <a class="more" href="{{ '/topics.html' | relative_url }}">すべてのTopicsへ</a>
+  </article>
+
+  <article class="card">
+    <h2>Music（最新）</h2>
+    <div id="latest-music" class="preview"></div>
+    <a class="more" href="{{ '/music.html' | relative_url }}">すべてのMusicへ</a>
+  </article>
+
+  <article class="card">
+    <h2>Movie（最新）</h2>
+    <div id="latest-movie" class="preview"></div>
+    <a class="more" href="{{ '/movie.html' | relative_url }}">すべてのMovieへ</a>
+  </article>
+
+  <article class="card">
+    <h2>Discography（最新）</h2>
+    <div id="latest-album" class="preview"></div>
+    <a class="more" href="{{ '/discography.html' | relative_url }}">すべてのDiscographyへ</a>
+  </article>
+
+  <article class="card">
+    <h2>Live（最新）</h2>
+    <div id="latest-live" class="preview"></div>
+    <a class="more" href="{{ '/live.html' | relative_url }}">すべてのLiveへ</a>
+  </article>
+</section>
+
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    if (window.main) {
+      main.loadLatest('topics', '#latest-topics', 'topic.html?id=');
+      main.loadLatest('music', '#latest-music', 'track.html?id=');
+      main.loadLatest('movies', '#latest-movie', 'movie.html?id=');
+      main.loadLatest('discography', '#latest-album', 'album.html?id=');
+      main.loadLatest('live', '#latest-live', 'live-event.html?id=');
+    }
+  });
+</script>

@@ -1,0 +1,13 @@
+---
+layout: default
+title: Movie
+---
+
+<h2>Movie</h2>
+<div id="movie-list" class="list"></div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    if (window.main) main.renderMovieList('#movie-list');
+  });
+</script>

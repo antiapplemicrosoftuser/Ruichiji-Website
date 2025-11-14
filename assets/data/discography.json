@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "id": "al001-ocean-dream",
+      "title": "Ocean Dream",
+      "date": "2025-11-01",
+      "cover": "https://via.placeholder.com/600x600?text=Ocean+Dream",
+      "artists": ["Name Surname", "Collaborator A"],
+      "description": "シングル『星の航海』を収録したEP。シネマティックな楽曲を中心に収録。",
+      "tracks": [
+        { "track_no": 1, "id": "m001-hoshinokoukai", "title": "星の航海", "author": "Name Surname" },
+        { "track_no": 2, "title": "Waves (Instrumental)", "author": "Name Surname" }
+      ]
+    },
+    {
+      "id": "al000-previous",
+      "title": "Previous Works",
+      "date": "2024-05-10",
+      "cover": "https://via.placeholder.com/600x600?text=Previous+Works",
+      "artists": ["Name Surname"],
+      "description": "過去の作品を集めたコンピレーション。テンプレートとしてご利用ください。",
+      "tracks": [
+        { "track_no": 1, "title": "Ambient Sky", "id": "m002-ambient-sky", "author": "Name Surname" },
+        { "track_no": 2, "title": "Night Tide", "author": "Name Surname" }
+      ]
+    }
+  ]
+}

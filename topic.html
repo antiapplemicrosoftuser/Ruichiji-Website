@@ -1,0 +1,13 @@
+---
+layout: default
+title: Topic
+---
+
+<div id="topic-item"></div>
+<p><a href="{{ '/topics.html' | relative_url }}">← Topics一覧に戻る</a></p>
+
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    if (window.main) main.renderTopicPage('#topic-item');
+  });
+</script>

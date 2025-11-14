@@ -1,0 +1,13 @@
+<header class="site-header" role="banner">
+  <div class="container">
+    <h1 class="site-title">Ruichiji</h1>
+
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="{{ '/topics.html' | relative_url }}" {% if page.url == '/topics.html' %}class="active"{% endif %}>Topics</a>
+      <a href="{{ '/music.html' | relative_url }}" {% if page.url == '/music.html' %}class="active"{% endif %}>Music</a>
+      <a href="{{ '/movie.html' | relative_url }}" {% if page.url == '/movie.html' %}class="active"{% endif %}>Movie</a>
+      <a href="{{ '/discography.html' | relative_url }}" {% if page.url == '/discography.html' %}class="active"{% endif %}>Discography</a>
+      <a href="{{ '/live.html' | relative_url }}" {% if page.url == '/live.html' %}class="active"{% endif %}>Live</a>
+    </nav>
+  </div>
+</header>

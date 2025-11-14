@@ -1,0 +1,13 @@
+---
+layout: default
+title: Live
+---
+
+<h2>Live</h2>
+<div id="live-list" class="list"></div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    if (window.main) main.renderLiveList('#live-list');
+  });
+</script>
