@@ -1,3 +1,3 @@
 title: Ruichiji
 baseurl: "/Ruichiji-Website" # repository pages で /repo を使う場合はここを "/your-repo" に変更してください
-permalink: /:path/
+permalink: "/:path.html"
