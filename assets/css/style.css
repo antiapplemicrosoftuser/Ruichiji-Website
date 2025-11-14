@@ -81,23 +81,70 @@ h1,h2,h3,h4,h5,h6 {
   display: inline-block;
 }
 
-/* ホーム専用：縦並びリストでは枠や背景を表示しない */
+/* ホーム専用リストの区切り・余白 */
+#home-list {
+  margin-top: 0.25rem;
+}
+#home-list ul { padding: 0; margin: 0; }
+
+/* 各項目のベーススタイル（枠無し、薄い区切り） */
 #home-list .item {
   background: transparent;
-  border-bottom: none; /* 既定の境界がある場合は無効化 */
-  padding: 0.8rem 0;
+  border: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04); /* 薄い区切り線 */
+  padding: 0.9rem 0;
+  transition: background-color .12s, transform .08s;
   display: block;
 }
-#home-list .item .thumb { display:none; } /* ホームではサムネを隠す（必要なら削除） */
-#home-list .item .kicker { font-size: 1.02rem; font-weight: 700; margin-bottom: .25rem; }
 
-/* リスト内の見出しの余白調整 */
-#home-list h2 {
-  margin: 0 0 .35rem 0;
-  font-size: 1.08rem;
+/* 最後の項目だけ下線を消す */
+#home-list .item:last-child {
+  border-bottom: none;
 }
+
+/* ホバーで軽い強調（枠ではなく背景のトーン変化） */
+#home-list .item:hover {
+  background: linear-gradient(90deg, rgba(100,181,246,0.02), rgba(58,160,255,0.01));
+  transform: translateY(-1px);
+}
+
+/* 項目内の見出し調整 */
+#home-list h2 {
+  margin: 0 0 .25rem 0;
+  font-size: 1.08rem; /* 通常のリスト見出しサイズ */
+  font-weight: 700;
+}
+
+/* Topics（最初の項目）の見出しをさらに大きく */
+#home-list .item:first-child h2 {
+  font-size: 1.36rem; /* 大きめ（要調整可） */
+  letter-spacing: 0.2px;
+}
+
+/* 見出し内のリンク装飾調整（クリック領域を広げる） */
+#home-list h2 a {
+  color: var(--text);
+  text-decoration: none;
+  display: inline-block;
+  padding: .05rem 0;
+}
+
+/* プレビュー本文（薄め） */
 #home-list .preview {
-  margin-left: 0;
+  color: var(--muted-2);
+  margin-top: .35rem;
+  font-size: .96rem;
+  line-height: 1.55;
+}
+
+/* サムネ非表示（ホームでは視線をテキストに集中させる） */
+#home-list .thumb { display: none; }
+
+/* モバイル調整 */
+@media (max-width:520px){
+  #home-list .item { padding: 0.8rem 0; }
+  #home-list .item:first-child h2 { font-size: 1.26rem; }
+  #home-list h2 { font-size: 1.02rem; }
 }
 
 /* メニューバー */
