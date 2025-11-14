@@ -309,16 +309,18 @@ const main = (function () {
       const trackHtml = (album.tracks || []).map(t => {
         const trackRef = (musicData.items||[]).find(m => m.id === t.id || m.title === t.title);
         if (trackRef) {
+          // 手動採番（例: 1. ）を残す（ol の自動マーカーは CSS で無効化する想定）
           return `<li>${escapeHtml(t.track_no || '')}. <a href="track.html?id=${trackRef.id}">${escapeHtml(trackRef.title)}</a> — ${escapeHtml(trackRef.composer || trackRef.author || '')}</li>`;
         } else {
-          return `<li>${escapeHtml(t.track_no || '')}. ${escapeHtml(t.title)} — ${escapeHtml(t.author || '')} ${t.id ? `(id: ${escapeHtml(t.id)})` : ''}</li>`;
+          // Discography 詳細ページではアイテムの内部 ID を表示しないようにする
+          return `<li>${escapeHtml(t.track_no || '')}. ${escapeHtml(t.title)} — ${escapeHtml(t.author || '')}</li>`;
         }
       }).join('');
 
       container.innerHTML = `
         <article class="card">
           <div style="display:flex;gap:1rem;align-items:flex-start;">
-            <img src="${thumbOrPlaceholder(album.cover,200,200)}" alt="" class="thumb" style="width:180px;height:180px">
+            <img src="${thumbOrPlaceholder(album.cover,200,200)}" alt="" class="thumb">
             <div>
               <h2 id="album-${escapeHtml(album.id)}">${escapeHtml(album.title)}</h2>
               <div class="meta-small">参加: ${escapeHtml((album.artists||[]).join(', ') || '未設定')}</div>
@@ -329,7 +331,7 @@ const main = (function () {
 
           <section style="margin-top:1rem">
             <h3>収録曲</h3>
-            <ol>
+            <ol class="manual-number">
               ${trackHtml || '<li>収録曲データがありません</li>'}
             </ol>
           </section>
@@ -369,7 +371,8 @@ const main = (function () {
       const setlistHtml = (item.setlist || []).map((s, idx) => {
         const found = (musicData.items||[]).find(m => m.id === s.id || m.title === s.title);
         if (found) {
-          return `<li>${idx+1}. <a href="tfrack.html?id=${found.id}">${escapeHtml(found.title)}</a></li>`;
+          // 手動番号（idx+1）を残す
+          return `<li>${idx+1}. <a href="track.html?id=${found.id}">${escapeHtml(found.title)}</a></li>`;
         } else {
           return `<li>${idx+1}. ${escapeHtml(s.title || s)}</li>`;
         }
@@ -388,7 +391,7 @@ const main = (function () {
           </section>
           <section style="margin-top:1rem">
             <h3>セットリスト</h3>
-            <ol>${setlistHtml || '<li>セットリスト情報がありません</li>'}</ol>
+            <ol class="manual-number">${setlistHtml || '<li>セットリスト情報がありません</li>'}</ol>
           </section>
         </article>
       `;
@@ -429,5 +432,5 @@ const main = (function () {
   };
 })();
 
-// ← ここを追加：window オブジェクトにも参照を設定しておく
+// window オブジェクトにも参照を設定しておく（ページ側から呼び出せるように）
 window.main = main;

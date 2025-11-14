@@ -308,3 +308,18 @@ a:focus, .main-nav a:focus {
 }
 
 hr { border: none; border-top:1px solid rgba(255,255,255,0.03); margin:1rem 0; }
+
+/* 手動採番を残すため、該当 ol の自動マーカーを消す */
+ol.manual-number {
+  list-style: none;       /* ブラウザの自動番号（マーカー）を無効化 */
+  margin-left: 0;         /* 必要なら調整 */
+  padding-left: 0;
+}
+
+/* 手動番号は li のテキスト先頭に入っている想定なので、
+   見た目を整えるために少し左パディングを入れる */
+ol.manual-number li {
+  padding-left: 0.25rem;  /* 手動番号とテキストの間隔調整 */
+  margin: 0.25rem 0;
+  line-height: 1.5;
+}
