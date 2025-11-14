@@ -428,3 +428,6 @@ const main = (function () {
     renderLivePage
   };
 })();
+
+// ← ここを追加：window オブジェクトにも参照を設定しておく
+window.main = main;
