@@ -3,36 +3,43 @@ layout: default
 title: Home
 ---
 
-<section id="latest-grid" class="grid">
-  <article class="card">
-    <h2>Topics（最新）</h2>
-    <div id="latest-topics" class="preview"></div>
-    <a class="more" href="{{ '/topics.html' | relative_url }}">すべてのTopicsへ</a>
-  </article>
+<section id="home-list" class="list">
+  <ul style="list-style:none;margin:0;padding:0;">
+    <li class="item">
+      <div>
+        <h2><a href="{{ '/topics.html' | relative_url }}">Topics（最新）</a></h2>
+        <div id="latest-topics" class="preview"></div>
+      </div>
+    </li>
 
-  <article class="card">
-    <h2>Music（最新）</h2>
-    <div id="latest-music" class="preview"></div>
-    <a class="more" href="{{ '/music.html' | relative_url }}">すべてのMusicへ</a>
-  </article>
+    <li class="item">
+      <div>
+        <h2><a href="{{ '/music.html' | relative_url }}">Music（最新）</a></h2>
+        <div id="latest-music" class="preview"></div>
+      </div>
+    </li>
 
-  <article class="card">
-    <h2>Movie（最新）</h2>
-    <div id="latest-movie" class="preview"></div>
-    <a class="more" href="{{ '/movie.html' | relative_url }}">すべてのMovieへ</a>
-  </article>
+    <li class="item">
+      <div>
+        <h2><a href="{{ '/movie.html' | relative_url }}">Movie（最新）</a></h2>
+        <div id="latest-movie" class="preview"></div>
+      </div>
+    </li>
 
-  <article class="card">
-    <h2>Discography（最新）</h2>
-    <div id="latest-album" class="preview"></div>
-    <a class="more" href="{{ '/discography.html' | relative_url }}">すべてのDiscographyへ</a>
-  </article>
+    <li class="item">
+      <div>
+        <h2><a href="{{ '/discography.html' | relative_url }}">Discography（最新）</a></h2>
+        <div id="latest-album" class="preview"></div>
+      </div>
+    </li>
 
-  <article class="card">
-    <h2>Live（最新）</h2>
-    <div id="latest-live" class="preview"></div>
-    <a class="more" href="{{ '/live.html' | relative_url }}">すべてのLiveへ</a>
-  </article>
+    <li class="item">
+      <div>
+        <h2><a href="{{ '/live.html' | relative_url }}">Live（最新）</a></h2>
+        <div id="latest-live" class="preview"></div>
+      </div>
+    </li>
+  </ul>
 </section>
 
 <script>
