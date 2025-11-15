@@ -41,10 +41,80 @@ const main = (function () {
           e.preventDefault();
           history.pushState(null, '', '#' + decodeURIComponent(hash));
           setTimeout(() => offsetScrollToElement(target), 10);
+          // ensure highlight updates when internal link uses pushState
+          try { setTimeout(highlightMovieByHash, 120); } catch (_) { /* highlight may be defined later */ }
         }
       }
     }, { passive: false });
   }
+
+  // --- begin highlight movie by hash additions ---
+
+  // Inject highlight CSS once
+  (function ensureMovieHighlightStyle() {
+    if (document.getElementById('movie-highlight-style')) return;
+    const style = document.createElement('style');
+    style.id = 'movie-highlight-style';
+    style.textContent = `
+/* highlight for selected movie card when jumped to via hash */
+.selected-movie {
+  background: linear-gradient(90deg, rgba(255,230,150,0.12), rgba(255,230,150,0.04));
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 2px rgba(255,200,0,0.08);
+  transition: background 240ms ease, box-shadow 240ms ease;
+}
+
+/* slightly emphasize the kicker/title inside the selected card */
+.selected-movie .kicker {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.02);
+}
+
+/* respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .selected-movie { transition: none; }
+}
+    `;
+    document.head.appendChild(style);
+  })();
+
+  // Highlight the movie item corresponding to the current hash (movie-<id>)
+  function highlightMovieByHash() {
+    // remove previous
+    const prev = document.querySelector('.selected-movie');
+    if (prev) prev.classList.remove('selected-movie');
+
+    const rawHash = location.hash ? decodeURIComponent(location.hash.slice(1)) : '';
+    if (!rawHash) return;
+
+    // Accept either "movie-<id>" or just "<id>"
+    const targetId = rawHash.startsWith('movie-') ? rawHash : 'movie-' + rawHash;
+    const el = document.getElementById(targetId);
+    if (!el) return;
+
+    el.classList.add('selected-movie');
+
+    // If element is partially off-screen, ensure it's scrolled into view nicely
+    // Use smooth scroll but only if user does not prefer reduced motion
+    try {
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReduced) {
+        // Slight delay to allow any offsetScroll adjustments to finish
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 80);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // Ensure highlight updates on navigation events
+  window.addEventListener('hashchange', highlightMovieByHash);
+  window.addEventListener('popstate', highlightMovieByHash);
+
+  // --- end highlight movie by hash additions ---
 
   function handleInitialHash() {
     if (location.hash) {
@@ -409,6 +479,8 @@ const main = (function () {
         }
       }).join('');
       container.innerHTML = html;
+      // after list rendered, ensure highlight for current hash (if any)
+      try { setTimeout(highlightMovieByHash, 50); } catch (_) {}
     } catch (e) {
       console.error('renderMovieList error', e);
     }
