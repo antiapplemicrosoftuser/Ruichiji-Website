@@ -71,6 +71,20 @@ const main = (function () {
     return res.json();
   }
 
+  async function fetchText(path) {
+    // path may be absolute or relative. If relative, resolve against baseAssets.
+    let url = String(path || '');
+    if (!url) return '';
+    if (!/^[a-z]+:\/\//i.test(url) && !url.startsWith('/')) {
+      url = baseAssets + url;
+    }
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error('Failed to fetch text ' + url + ' status=' + res.status);
+    }
+    return res.text();
+  }
+
   function qParam(key) {
     const params = new URLSearchParams(location.search);
     return params.get(key);
@@ -97,6 +111,7 @@ const main = (function () {
     if (!str) return '';
     return String(str).toLowerCase().replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
   }
+
   function findMusicRef(musicItems = [], ref) {
     if (!ref) return null;
     const r = String(ref).trim();
@@ -129,6 +144,24 @@ const main = (function () {
     return null;
   }
 
+  // Find movies that reference a given music id (support musicID/musicIDs/tracks[].musicID and legacy fields)
+  function findMoviesByMusicId(movieItems = [], musicId) {
+    if (!musicId) return [];
+    const r = String(musicId).trim();
+    const list = (movieItems || []).filter(m => {
+      // new fields
+      if (m.musicID && String(m.musicID).trim().toLowerCase() === r.toLowerCase()) return true;
+      if (Array.isArray(m.musicIDs) && m.musicIDs.some(x => String(x).trim().toLowerCase() === r.toLowerCase())) return true;
+      if (Array.isArray(m.tracks) && m.tracks.some(t => t && t.musicID && String(t.musicID).trim().toLowerCase() === r.toLowerCase())) return true;
+      // legacy fields: track, track_id, tracks[].id
+      if (m.track && String(m.track).trim().toLowerCase() === r.toLowerCase()) return true;
+      if (m.track_id && String(m.track_id).trim().toLowerCase() === r.toLowerCase()) return true;
+      if (Array.isArray(m.tracks) && m.tracks.some(t => t && (String(t.id||'').trim().toLowerCase() === r.toLowerCase()))) return true;
+      return false;
+    });
+    return list;
+  }
+
   function embedVideoHtml(url) {
     if (!url) return '';
     // YouTube
@@ -156,7 +189,6 @@ const main = (function () {
         return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe src="${embed}" frameborder="0" scrolling="no" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe></div>`;
       }
     } catch (e) {
-      // fall through to link fallback
       console.debug('embedVideoHtml: nico embed extraction failed', e, url);
     }
 
@@ -271,23 +303,36 @@ const main = (function () {
     try {
       const id = qParam('id');
       const container = document.querySelector(containerSelector);
-      if (!id) { if (container) container.innerHTML = '<p>idが指定されていません。</p>'; return; }
+      if (!container) return;
+      if (!id) { container.innerHTML = '<p>idが指定されていません。</p>'; return; }
       const data = await fetchJSON('music');
       const items = data.items || data;
       const item = items.find(x => x.id === id);
-      if (!item) { if (container) container.innerHTML = '<p>曲が見つかりません。</p>'; return; }
+      if (!item) { container.innerHTML = '<p>曲が見つかりません。</p>'; return; }
 
-      const disc = await fetchJSON('discography').catch(()=>({items:[]}));
-
-      const albumHtml = (item.albums||[]).map(albumId => {
-        const a = (disc.items || disc).find(x => x.id === albumId);
-        if (a) {
-          return `<li><a href="album.html?id=${a.id}"><img src="${thumbOrPlaceholder(a.cover,64,64)}" alt="" style="height:48px;width:48px;object-fit:cover;margin-right:8px;vertical-align:middle;border-radius:6px;"> ${escapeHtml(a.title)}</a></li>`;
-        } else {
-          return `<li>${escapeHtml(albumId)} (アルバム情報未設定)</li>`;
+      // If lyrics are in external file, fetch it. Support item.lyricsFile (relative to baseAssets) or absolute URL.
+      let lyricsText = item.lyrics || '';
+      if (item.lyricsFile) {
+        try {
+          lyricsText = await fetchText(item.lyricsFile);
+        } catch (e) {
+          console.warn('Failed to load lyrics file', item.lyricsFile, e);
+          // fallback: keep item.lyrics if any
+          lyricsText = item.lyrics || '';
         }
+      }
+
+      // Find related MV(s) by musicID
+      const moviesData = await fetchJSON('movies').catch(()=>({items:[]}));
+      const relatedMovies = findMoviesByMusicId(moviesData.items || [], item.id);
+
+      const relatedMVHtml = (relatedMovies || []).map(mv => {
+        // link to movie list page anchored to the item so it scrolls into view
+        const anchor = `movie.html#movie-${encodeURIComponent(mv.id)}`;
+        return `<li><a href="${anchor}">${escapeHtml(mv.title)}</a>（${escapeHtml(mv.date||'')}）</li>`;
       }).join('');
 
+      // render page with lyrics and MV links
       container.innerHTML = `
         <article class="card">
           <h2 id="track-${escapeHtml(item.id)}">${escapeHtml(item.title)}</h2>
@@ -295,17 +340,20 @@ const main = (function () {
           <div style="margin: .8rem 0;">
             ${item.audio ? `<audio controls src="${item.audio}"></audio>` : `<p class="meta-small">この曲の音源は用意されていません。</p>`}
           </div>
+
+          ${relatedMVHtml ? `<section><h3>関連MV</h3><ul>${relatedMVHtml}</ul></section>` : ''}
+
           <section>
             <h3>Credits</h3>
             <p class="meta-small">${escapeHtml((item.credits||[]).join(', ') || '未設定')}</p>
           </section>
           <section>
             <h3>Lyrics</h3>
-            <div class="content">${nl2br(escapeHtml(item.lyrics || '歌詞は未設定です。'))}</div>
+            <div class="content" id="lyrics-content">${nl2br(escapeHtml(lyricsText || '歌詞は未設定です。'))}</div>
           </section>
           <section>
             <h3>収録アルバム</h3>
-            <ul>${albumHtml || '<li>収録アルバムはありません。</li>'}</ul>
+            <ul>${(item.albums||[]).map(aId=>`<li><a href="album.html?id=${aId}">${escapeHtml(aId)}</a></li>`).join('') || '<li>収録アルバムはありません。</li>'}</ul>
           </section>
         </article>
       `;
@@ -341,16 +389,19 @@ const main = (function () {
 
           const linksHtml = relatedLinks.length ? `<p class="meta-small">関連曲: ${relatedLinks.join(' ・ ')}</p>` : '';
 
+          // add id to container so other pages can link to movie.html#movie-<id>
+          const itemIdAttr = `movie-${escapeHtml(m.id)}`;
+
           return `
-            <div class="item">
+            <div class="item" id="${itemIdAttr}">
               <div class="meta">${m.date || ''}</div>
               <div>
                 <div class="kicker"><a href="movie.html?id=${m.id}">${escapeHtml(m.title)}</a></div>
                 <div class="meta-small">${escapeHtml(m.service || '')} ${escapeHtml(m.uploader||'')}</div>
                 <div style="margin-top:.5rem">${m.video ? embedVideoHtml(m.video) : '<p>リンクのみ</p>'}</div>
                 ${linksHtml}
+              </div>
             </div>
-          </div>
           `;
         } catch (innerErr) {
           console.error('renderMovieList: item render error', innerErr, m);
@@ -367,11 +418,12 @@ const main = (function () {
     try {
       const id = qParam('id');
       const container = document.querySelector(containerSelector);
-      if (!id) { if (container) container.innerHTML = '<p>idが指定されていません。</p>'; return; }
+      if (!container) return;
+      if (!id) { container.innerHTML = '<p>idが指定されていません。</p>'; return; }
       const data = await fetchJSON('movies');
       const items = data.items || data;
       const item = items.find(x => x.id === id);
-      if (!item) { if (container) container.innerHTML = '<p>動画が見つかりません。</p>'; return; }
+      if (!item) { container.innerHTML = '<p>動画が見つかりません。</p>'; return; }
 
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
 
@@ -439,11 +491,12 @@ const main = (function () {
     try {
       const id = qParam('id');
       const container = document.querySelector(containerSelector);
-      if (!id) { if (container) container.innerHTML = '<p>id が指定されていません。</p>'; return; }
+      if (!container) return;
+      if (!id) { container.innerHTML = '<p>id が指定されていません。</p>'; return; }
       const data = await fetchJSON('discography');
       const items = data.items || data;
       const album = items.find(x => x.id === id);
-      if (!album) { if (container) container.innerHTML = '<p>アルバムが見つかりません。</p>'; return; }
+      if (!album) { container.innerHTML = '<p>アルバムが見つかりません。</p>'; return; }
 
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
       const trackHtml = (album.tracks || []).map(t => {
@@ -506,10 +559,11 @@ const main = (function () {
     try {
       const id = qParam('id');
       const container = document.querySelector(containerSelector);
-      if (!id) { if (container) container.innerHTML = '<p>idが指定されていません。</p>'; return; }
+      if (!container) return;
+      if (!id) { container.innerHTML = '<p>idが指定されていません。</p>'; return; }
       const data = await fetchJSON('live');
       const item = (data.items || data).find(x => x.id === id);
-      if (!item) { if (container) container.innerHTML = '<p>ライブ情報が見つかりません。</p>'; return; }
+      if (!item) { container.innerHTML = '<p>ライブ情報が見つかりません。</p>'; return; }
 
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
       const setlistHtml = (item.setlist || []).map((s, idx) => {
