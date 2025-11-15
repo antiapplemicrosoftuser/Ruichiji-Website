@@ -94,6 +94,53 @@ const main = (function () {
     return url || `https://via.placeholder.com/${w}x${h}?text=Image`;
   }
 
+  // Utilities for finding music items flexibly
+  function normalize(str) {
+    if (!str) return '';
+    return String(str).trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+  function slugify(str) {
+    if (!str) return '';
+    return String(str).toLowerCase().replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
+  // Try multiple heuristics to find a music item by id/title-like reference
+  function findMusicRef(musicItems = [], ref) {
+    if (!ref) return null;
+    const r = String(ref).trim();
+
+    // exact id match
+    let found = (musicItems || []).find(x => x.id === r);
+    if (found) return found;
+
+    // exact id match ignoring case
+    found = (musicItems || []).find(x => x.id && x.id.toLowerCase() === r.toLowerCase());
+    if (found) return found;
+
+    // id contains (sometimes stored like 'm001-hoshinokoukai', ref may be 'm001')
+    found = (musicItems || []).find(x => x.id && x.id.toLowerCase().includes(r.toLowerCase()));
+    if (found) return found;
+
+    // exact title match (case-insensitive)
+    found = (musicItems || []).find(x => x.title && normalize(x.title) === normalize(r));
+    if (found) return found;
+
+    // title contains ref
+    found = (musicItems || []).find(x => x.title && normalize(x.title).includes(normalize(r)));
+    if (found) return found;
+
+    // ref contains title
+    found = (musicItems || []).find(x => x.title && normalize(r).includes(normalize(x.title)));
+    if (found) return found;
+
+    // slug compare
+    const refSlug = slugify(r);
+    found = (musicItems || []).find(x => slugify(x.title) === refSlug || (x.id && slugify(x.id) === refSlug));
+    if (found) return found;
+
+    return null;
+  }
+
   async function loadLatest(kind, containerSelector, linkPrefix) {
     try {
       const data = await fetchJSON(kind);
@@ -246,35 +293,34 @@ const main = (function () {
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
       const container = document.querySelector(containerSelector);
       container.innerHTML = items.map(m => {
-        // 探索的に関連する曲を見つけ、あればリンクを作る（柔軟に対応）
+        // Collect candidate references from multiple possible fields
         const related = [];
-        // movie に直接 track / track_id / tracks があれば優先
         if (m.track) related.push(m.track);
         if (m.track_id) related.push(m.track_id);
         if (Array.isArray(m.tracks)) {
           m.tracks.forEach(t => {
             if (typeof t === 'string') related.push(t);
             if (t && t.id) related.push(t.id);
+            if (t && t.title) related.push(t.title);
           });
         }
         if (Array.isArray(m.track_ids)) m.track_ids.forEach(t => related.push(t));
-        // または music.json を参照して title が一致するものを拾う（フォールバック）
+        if (Array.isArray(m.related_tracks)) m.related_tracks.forEach(t => related.push(t));
+        // fallback: title matching
         if (related.length === 0 && musicData.items) {
           const foundByTitle = (musicData.items || []).find(x => x.title === m.title || (m.title && x.title && x.title.includes(m.title)));
           if (foundByTitle) related.push(foundByTitle.id);
         }
 
-        // related を track id -> HTML link に変換
-        const relatedHtml = (related || []).map(rid => {
-          const ref = (musicData.items||[]).find(x => x.id === rid || x.title === rid);
-          if (ref) {
-            return `<a href="track.html?id=${ref.id}">${escapeHtml(ref.title)}</a>`;
-          } else {
-            return null;
-          }
+        // Resolve to music items
+        const relatedHtmlArr = (related || []).map(r => {
+          const ref = findMusicRef(musicData.items || [], r);
+          if (ref) return `<a href="track.html?id=${ref.id}">${escapeHtml(ref.title)}</a>`;
+          console.debug('movie->track: no match for', r, 'in movie', m.id || m.title);
+          return null;
         }).filter(Boolean);
 
-        const linksHtml = relatedHtml.length ? `<p class="meta-small">関連曲: ${relatedHtml.join(' ・ ')}</p>` : '';
+        const linksHtml = relatedHtmlArr.length ? `<p class="meta-small">関連曲: ${relatedHtmlArr.join(' ・ ')}</p>` : '';
 
         return `
         <div class="item">
@@ -304,7 +350,7 @@ const main = (function () {
 
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
 
-      // build related tracks list (support various schemas)
+      // Collect related ids/titles from multiple possible fields
       const relatedIds = [];
       if (item.track) relatedIds.push(item.track);
       if (item.track_id) relatedIds.push(item.track_id);
@@ -312,11 +358,13 @@ const main = (function () {
         item.tracks.forEach(t => {
           if (typeof t === 'string') relatedIds.push(t);
           if (t && t.id) relatedIds.push(t.id);
+          if (t && t.title) relatedIds.push(t.title);
         });
       }
       if (Array.isArray(item.track_ids)) item.track_ids.forEach(t => relatedIds.push(t));
+      if (Array.isArray(item.related_tracks)) item.related_tracks.forEach(t => relatedIds.push(t));
 
-      // fallback: find music items whose title matches part of movie title or vice versa
+      // fallback: detect by title similarity
       if (relatedIds.length === 0 && musicData.items) {
         (musicData.items||[]).forEach(m => {
           if (item.title && m.title && (m.title === item.title || m.title.includes(item.title) || item.title.includes(m.title))) {
@@ -326,10 +374,11 @@ const main = (function () {
       }
 
       const relatedHtml = (relatedIds || []).map(rid => {
-        const ref = (musicData.items||[]).find(x => x.id === rid || x.title === rid);
+        const ref = findMusicRef(musicData.items||[], rid);
         if (ref) {
           return `<li><a href="track.html?id=${ref.id}">${escapeHtml(ref.title)}</a></li>`;
         } else {
+          console.debug('movie page: no match for related reference', rid, 'movie=', item.id || item.title);
           return '';
         }
       }).filter(Boolean).join('');
@@ -351,11 +400,6 @@ const main = (function () {
         </article>
       `;
     } catch (e) { console.error(e); }
-  }
-
-  async function renderMovieList(containerSelector) {
-    // keep compatibility: function name exists earlier; duplicate definition avoided
-    // (kept above actual implementation)
   }
 
   async function renderDiscography(containerSelector) {
@@ -510,7 +554,6 @@ const main = (function () {
     renderTrackPage,
     renderMovieList,
     renderMoviePage,
-    renderMovieList, // keep compatibility (one of these names is used from pages)
     renderDiscography,
     renderAlbumPage,
     renderLiveList,
