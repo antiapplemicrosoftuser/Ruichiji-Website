@@ -243,35 +243,119 @@ const main = (function () {
     try {
       const data = await fetchJSON('movies');
       const items = sortByDateDesc(data.items || data);
+      const musicData = await fetchJSON('music').catch(()=>({items:[]}));
       const container = document.querySelector(containerSelector);
-      container.innerHTML = items.map(m => `
+      container.innerHTML = items.map(m => {
+        // 探索的に関連する曲を見つけ、あればリンクを作る（柔軟に対応）
+        const related = [];
+        // movie に直接 track / track_id / tracks があれば優先
+        if (m.track) related.push(m.track);
+        if (m.track_id) related.push(m.track_id);
+        if (Array.isArray(m.tracks)) {
+          m.tracks.forEach(t => {
+            if (typeof t === 'string') related.push(t);
+            if (t && t.id) related.push(t.id);
+          });
+        }
+        if (Array.isArray(m.track_ids)) m.track_ids.forEach(t => related.push(t));
+        // または music.json を参照して title が一致するものを拾う（フォールバック）
+        if (related.length === 0 && musicData.items) {
+          const foundByTitle = (musicData.items || []).find(x => x.title === m.title || (m.title && x.title && x.title.includes(m.title)));
+          if (foundByTitle) related.push(foundByTitle.id);
+        }
+
+        // related を track id -> HTML link に変換
+        const relatedHtml = (related || []).map(rid => {
+          const ref = (musicData.items||[]).find(x => x.id === rid || x.title === rid);
+          if (ref) {
+            return `<a href="track.html?id=${ref.id}">${escapeHtml(ref.title)}</a>`;
+          } else {
+            return null;
+          }
+        }).filter(Boolean);
+
+        const linksHtml = relatedHtml.length ? `<p class="meta-small">関連曲: ${relatedHtml.join(' ・ ')}</p>` : '';
+
+        return `
         <div class="item">
           <div class="meta">${m.date || ''}</div>
           <div>
-            <div class="kicker">${escapeHtml(m.title)}</div>
+            <div class="kicker"><a href="movie.html?id=${m.id}">${escapeHtml(m.title)}</a></div>
             <div class="meta-small">${escapeHtml(m.service || '')} ${escapeHtml(m.uploader||'')}</div>
             <div style="margin-top:.5rem">${m.video ? embedVideoHtml(m.video) : '<p>リンクのみ</p>'}</div>
+            ${linksHtml}
             <p><a href="${m.url || '#'}" target="_blank" rel="noopener">動画ページへ</a></p>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     } catch (e) { console.error(e); }
   }
 
-  function embedVideoHtml(url) {
-    if (!url) return '';
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      let id = null;
-      if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1].split(/[?&]/)[0];
-      if (url.includes('v=')) id = new URLSearchParams(url.split('?')[1]).get('v');
-      if (!id) return `<a href="${url}" target="_blank">${escapeHtml(url)}</a>`;
-      const embed = `https://www.youtube.com/embed/${id}`;
-      return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe src="${embed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe></div>`;
-    }
-    if (url.includes('nicovideo.jp') || url.includes('nico.ms')) {
-      return `<p><a href="${url}" target="_blank" rel="noopener">ニコニコ動画で見る</a></p>`;
-    }
-    return `<p><a href="${url}" target="_blank" rel="noopener">${escapeHtml(url)}</a></p>`;
+  async function renderMoviePage(containerSelector) {
+    const id = qParam('id');
+    if (!id) { document.querySelector(containerSelector).innerHTML = '<p>idが指定されていません。</p>'; return; }
+    try {
+      const data = await fetchJSON('movies');
+      const items = data.items || data;
+      const item = items.find(x => x.id === id);
+      const container = document.querySelector(containerSelector);
+      if (!item) { container.innerHTML = '<p>動画が見つかりません。</p>'; return; }
+
+      const musicData = await fetchJSON('music').catch(()=>({items:[]}));
+
+      // build related tracks list (support various schemas)
+      const relatedIds = [];
+      if (item.track) relatedIds.push(item.track);
+      if (item.track_id) relatedIds.push(item.track_id);
+      if (Array.isArray(item.tracks)) {
+        item.tracks.forEach(t => {
+          if (typeof t === 'string') relatedIds.push(t);
+          if (t && t.id) relatedIds.push(t.id);
+        });
+      }
+      if (Array.isArray(item.track_ids)) item.track_ids.forEach(t => relatedIds.push(t));
+
+      // fallback: find music items whose title matches part of movie title or vice versa
+      if (relatedIds.length === 0 && musicData.items) {
+        (musicData.items||[]).forEach(m => {
+          if (item.title && m.title && (m.title === item.title || m.title.includes(item.title) || item.title.includes(m.title))) {
+            relatedIds.push(m.id);
+          }
+        });
+      }
+
+      const relatedHtml = (relatedIds || []).map(rid => {
+        const ref = (musicData.items||[]).find(x => x.id === rid || x.title === rid);
+        if (ref) {
+          return `<li><a href="track.html?id=${ref.id}">${escapeHtml(ref.title)}</a></li>`;
+        } else {
+          return '';
+        }
+      }).filter(Boolean).join('');
+
+      container.innerHTML = `
+        <article class="card">
+          <h2 id="movie-${escapeHtml(item.id)}">${escapeHtml(item.title)}</h2>
+          <div class="meta-small">公開: ${item.date || ''} ・ ${escapeHtml(item.service || '')} ${escapeHtml(item.uploader || '')}</div>
+          <div style="margin-top:.8rem">
+            ${item.video ? embedVideoHtml(item.video) : `<p>${escapeHtml(item.description||'')}</p>`}
+          </div>
+
+          ${relatedHtml ? `<section style="margin-top:1rem"><h3>関連曲</h3><ul>${relatedHtml}</ul></section>` : ''}
+
+          <section style="margin-top:1rem">
+            <h3>詳細</h3>
+            <div class="content">${nl2br(escapeHtml(item.description || ''))}</div>
+          </section>
+        </article>
+      `;
+    } catch (e) { console.error(e); }
+  }
+
+  async function renderMovieList(containerSelector) {
+    // keep compatibility: function name exists earlier; duplicate definition avoided
+    // (kept above actual implementation)
   }
 
   async function renderDiscography(containerSelector) {
@@ -425,6 +509,8 @@ const main = (function () {
     renderMusicList,
     renderTrackPage,
     renderMovieList,
+    renderMoviePage,
+    renderMovieList, // keep compatibility (one of these names is used from pages)
     renderDiscography,
     renderAlbumPage,
     renderLiveList,
