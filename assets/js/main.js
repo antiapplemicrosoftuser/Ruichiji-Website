@@ -169,7 +169,10 @@ const main = (function () {
   }
 
   function thumbOrPlaceholder(url, w = 200, h = 200) {
-    return url || `https://via.placeholder.com/${w}x${h}?text=Image`;
+    // Default cover image path (relative to baseAssets)
+    const DEFAULT_COVER_PATH = baseAssets + 'images/default-cover.svg';
+    if (url) return url;
+    return DEFAULT_COVER_PATH;
   }
 
   // Utilities for flexible music lookup
