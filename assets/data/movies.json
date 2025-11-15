@@ -8,7 +8,8 @@
       "uploader": "Official Channel",
       "video": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "description": "最新シングル『星の航海』のミュージックビデオ。"
+      "description": "最新シングル『星の航海』のミュージックビデオ。",
+      "musicID": "m001-hoshinokoukai"
     },
     {
       "id": "v2024-12-liveclip",

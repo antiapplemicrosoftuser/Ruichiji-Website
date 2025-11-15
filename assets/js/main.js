@@ -118,7 +118,7 @@ const main = (function () {
     return null;
   }
 
-  // New: only match by ID (exact or case-insensitive). Use this when we should create links only if movie provides an ID.
+  // Strict ID-only finder (exact or case-insensitive) - for musicID matching
   function findMusicById(musicItems = [], ref) {
     if (!ref) return null;
     const r = String(ref).trim();
@@ -296,7 +296,7 @@ const main = (function () {
     } catch (e) { console.error('renderTrackPage error', e); }
   }
 
-  // ---- Movie list / page (link only when ID matches) ----
+  // ---- Movie list / page (match using musicID field) ----
   async function renderMovieList(containerSelector) {
     try {
       const data = await fetchJSON('movies');
@@ -306,25 +306,21 @@ const main = (function () {
       if (!container) return;
       const html = items.map(m => {
         try {
-          // Collect candidate references from multiple possible fields
+          // Collect candidate musicID references from new fields
           const relatedCandidates = [];
-          if (m.track) relatedCandidates.push(m.track);
-          if (m.track_id) relatedCandidates.push(m.track_id);
+          if (m.musicID) relatedCandidates.push(m.musicID);
+          if (Array.isArray(m.musicIDs)) m.musicIDs.forEach(t => relatedCandidates.push(t));
+          // also support tracks array with musicID per track object
           if (Array.isArray(m.tracks)) {
             m.tracks.forEach(t => {
-              if (typeof t === 'string') relatedCandidates.push(t);
-              if (t && t.id) relatedCandidates.push(t.id);
-              if (t && t.title) relatedCandidates.push(t.title);
+              if (t && t.musicID) relatedCandidates.push(t.musicID);
             });
           }
-          if (Array.isArray(m.track_ids)) m.track_ids.forEach(t => relatedCandidates.push(t));
-          if (Array.isArray(m.related_tracks)) m.related_tracks.forEach(t => relatedCandidates.push(t));
 
-          // IMPORTANT: only create links when movie-provided reference matches a music.id (exact or case-insensitive).
+          // Only create links when movie-provided musicID matches a music.id (exact or case-insensitive).
           const relatedLinks = (relatedCandidates || []).map(ref => {
             const refItem = findMusicById(musicData.items || [], ref);
             if (refItem) return `<a href="track.html?id=${refItem.id}">${escapeHtml(refItem.title)}</a>`;
-            // no link if id does not match; do not fallback to title-based linking here
             return null;
           }).filter(Boolean);
 
@@ -365,25 +361,19 @@ const main = (function () {
 
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
 
-      // Collect candidate references from multiple possible fields
       const relatedCandidates = [];
-      if (item.track) relatedCandidates.push(item.track);
-      if (item.track_id) relatedCandidates.push(item.track_id);
+      if (item.musicID) relatedCandidates.push(item.musicID);
+      if (Array.isArray(item.musicIDs)) item.musicIDs.forEach(t => relatedCandidates.push(t));
       if (Array.isArray(item.tracks)) {
         item.tracks.forEach(t => {
-          if (typeof t === 'string') relatedCandidates.push(t);
-          if (t && t.id) relatedCandidates.push(t.id);
-          if (t && t.title) relatedCandidates.push(t.title);
+          if (t && t.musicID) relatedCandidates.push(t.musicID);
         });
       }
-      if (Array.isArray(item.track_ids)) item.track_ids.forEach(t => relatedCandidates.push(t));
-      if (Array.isArray(item.related_tracks)) item.related_tracks.forEach(t => relatedCandidates.push(t));
 
       // Only create links for ID matches
       const relatedHtml = (relatedCandidates || []).map(ref => {
         const refItem = findMusicById(musicData.items || [], ref);
         if (refItem) return `<li><a href="track.html?id=${refItem.id}">${escapeHtml(refItem.title)}</a></li>`;
-        // If not ID-match, don't create link (you can show plain text if desired)
         return '';
       }).filter(Boolean).join('');
 
@@ -443,7 +433,9 @@ const main = (function () {
 
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
       const trackHtml = (album.tracks || []).map(t => {
-        const trackRef = (musicData.items||[]).find(m => m.id === t.id || m.title === t.title);
+        // Prefer new field musicID on track entries
+        const musicRefId = (t && t.musicID) ? t.musicID : (t && t.id) ? t.id : null;
+        const trackRef = musicRefId ? (musicData.items||[]).find(m => m.id === musicRefId) : null;
         if (trackRef) {
           // 手動採番を残し、リンクは track.html?id=...
           return `<li>${escapeHtml(t.track_no || '')}. <a href="track.html?id=${trackRef.id}">${escapeHtml(trackRef.title)}</a> — ${escapeHtml(trackRef.composer || trackRef.author || '')}</li>`;
