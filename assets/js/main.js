@@ -289,7 +289,7 @@ const main = (function () {
         html = `<div class="kicker">${escapeHtml(latest.title)}</div>
                 <div class="meta-small">公開: ${latest.date || ''}</div>
                 ${latest.video ? embedVideoHtml(latest.video) : `<p>${escapeHtml(truncate(latest.description||'',120))}</p>`}
-                <p><a href="${linkPrefix + latest.id}">動画ページへ</a></p>`;
+                <p><a href="movie.html">動画一覧へ</a></p>`;
       } else if (kind === 'discography') {
         html = `<img src="${thumbOrPlaceholder(latest.cover,120,120)}" alt="" class="thumb" style="float:left;margin-right:12px">
                 <div class="kicker">${escapeHtml(latest.title)}</div>
