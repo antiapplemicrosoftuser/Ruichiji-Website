@@ -462,11 +462,15 @@ const main = (function () {
           // add id to container so other pages can link to movie.html#movie-<id>
           const itemIdAttr = `movie-${escapeHtml(m.id)}`;
 
+          // Title should link to video (or external url) if available, otherwise to movie page
+          const titleHref = m.video || m.url || `movie.html?id=${m.id}`;
+          const titleHrefEncoded = encodeURI(String(titleHref));
+
           return `
             <div class="item" id="${itemIdAttr}">
               <div class="meta">${m.date || ''}</div>
               <div>
-                <div class="kicker"><a href="movie.html?id=${m.id}">${escapeHtml(m.title)}</a></div>
+                <div class="kicker"><a href="${titleHrefEncoded}" target="_blank" rel="noopener">${escapeHtml(m.title)}</a></div>
                 <div class="meta-small">${escapeHtml(m.service || '')} ${escapeHtml(m.uploader||'')}</div>
                 <div style="margin-top:.5rem">${m.video ? embedVideoHtml(m.video) : '<p>リンクのみ</p>'}</div>
                 ${linksHtml}
