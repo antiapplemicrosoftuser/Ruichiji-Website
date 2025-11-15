@@ -4,7 +4,7 @@ const main = (function () {
   const baseAssets = (window && window.SITE_ASSET_PATH) ? window.SITE_ASSET_PATH : 'assets/';
   const dataPath = baseAssets + 'data/';
 
-  // ---- ヘッダー固定に伴う body の padding-top を設定（Version1 相当） ----
+  // ---- ヘッダー固定に伴う body の padding-top を設定 ----
   let currentHeaderHeight = 0;
   function adjustHeaderSpacing() {
     const header = document.querySelector('.site-header');
@@ -17,18 +17,14 @@ const main = (function () {
     document.documentElement.style.setProperty('scroll-padding-top', `${h}px`);
   }
 
-  // ハッシュや内部リンクで移動するときにヘッダー分を補正してスクロールする
   function offsetScrollToElement(el, instant = false) {
     if (!el) return;
-    const extraOffset = 8; // small extra
+    const extraOffset = 8;
     const headerH = currentHeaderHeight || parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 0;
     const rect = el.getBoundingClientRect();
     const targetY = window.scrollY + rect.top - headerH - extraOffset;
-    if (instant) {
-      window.scrollTo(0, targetY);
-    } else {
-      window.scrollTo({ top: targetY, behavior: 'smooth' });
-    }
+    if (instant) window.scrollTo(0, targetY);
+    else window.scrollTo({ top: targetY, behavior: 'smooth' });
   }
 
   function attachInternalLinkHandler() {
@@ -54,9 +50,7 @@ const main = (function () {
     if (location.hash) {
       const id = decodeURIComponent(location.hash.slice(1));
       const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
-      if (el) {
-        setTimeout(() => offsetScrollToElement(el, true), 50);
-      }
+      if (el) setTimeout(() => offsetScrollToElement(el, true), 50);
     }
   }
 
@@ -73,7 +67,7 @@ const main = (function () {
   async function fetchJSON(name) {
     const url = dataPath + name + '.json';
     const res = await fetch(url);
-    if (!res.ok) throw new Error('Failed to load ' + url);
+    if (!res.ok) throw new Error('Failed to load ' + url + ' status=' + res.status);
     return res.json();
   }
 
@@ -94,7 +88,7 @@ const main = (function () {
     return url || `https://via.placeholder.com/${w}x${h}?text=Image`;
   }
 
-  // Utilities for finding music items flexibly
+  // Utilities for flexible music lookup
   function normalize(str) {
     if (!str) return '';
     return String(str).trim().toLowerCase().replace(/\s+/g, ' ');
@@ -103,44 +97,47 @@ const main = (function () {
     if (!str) return '';
     return String(str).toLowerCase().replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
   }
-
-  // Try multiple heuristics to find a music item by id/title-like reference
   function findMusicRef(musicItems = [], ref) {
     if (!ref) return null;
     const r = String(ref).trim();
-
-    // exact id match
     let found = (musicItems || []).find(x => x.id === r);
     if (found) return found;
-
-    // exact id match ignoring case
     found = (musicItems || []).find(x => x.id && x.id.toLowerCase() === r.toLowerCase());
     if (found) return found;
-
-    // id contains (sometimes stored like 'm001-hoshinokoukai', ref may be 'm001')
     found = (musicItems || []).find(x => x.id && x.id.toLowerCase().includes(r.toLowerCase()));
     if (found) return found;
-
-    // exact title match (case-insensitive)
     found = (musicItems || []).find(x => x.title && normalize(x.title) === normalize(r));
     if (found) return found;
-
-    // title contains ref
     found = (musicItems || []).find(x => x.title && normalize(x.title).includes(normalize(r)));
     if (found) return found;
-
-    // ref contains title
     found = (musicItems || []).find(x => x.title && normalize(r).includes(normalize(x.title)));
     if (found) return found;
-
-    // slug compare
     const refSlug = slugify(r);
     found = (musicItems || []).find(x => slugify(x.title) === refSlug || (x.id && slugify(x.id) === refSlug));
     if (found) return found;
-
     return null;
   }
 
+  function embedVideoHtml(url) {
+    if (!url) return '';
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      let id = null;
+      if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1].split(/[?&]/)[0];
+      if (url.includes('v=')) {
+        const q = url.split('?')[1] || '';
+        id = new URLSearchParams(q).get('v') || id;
+      }
+      if (!id) return `<a href="${url}" target="_blank">${escapeHtml(url)}</a>`;
+      const embed = `https://www.youtube.com/embed/${id}`;
+      return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe src="${embed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe></div>`;
+    }
+    if (url.includes('nicovideo.jp') || url.includes('nico.ms')) {
+      return `<p><a href="${url}" target="_blank" rel="noopener">ニコニコ動画で見る</a></p>`;
+    }
+    return `<p><a href="${url}" target="_blank" rel="noopener">${escapeHtml(url)}</a></p>`;
+  }
+
+  // ---- loadLatest ----
   async function loadLatest(kind, containerSelector, linkPrefix) {
     try {
       const data = await fetchJSON(kind);
@@ -181,15 +178,17 @@ const main = (function () {
       }
       container.innerHTML = html;
     } catch (e) {
-      console.error(e);
+      console.error('loadLatest error', e);
     }
   }
 
+  // ---- Topics list / topic page ----
   async function renderTopicsList(containerSelector) {
     try {
       const data = await fetchJSON('topics');
       const items = sortByDateDesc(data.items || data);
       const container = document.querySelector(containerSelector);
+      if (!container) return;
       container.innerHTML = items.map(t => `
         <div class="item">
           <div class="meta">${t.date || ''}</div>
@@ -199,20 +198,18 @@ const main = (function () {
           </div>
         </div>
       `).join('');
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error('renderTopicsList error', e); }
   }
 
   async function renderTopicPage(containerSelector) {
-    const id = qParam('id');
-    if (!id) { document.querySelector(containerSelector).innerHTML = '<p>idが指定されていません。</p>'; return; }
     try {
+      const id = qParam('id');
+      const container = document.querySelector(containerSelector);
+      if (!id) { if (container) container.innerHTML = '<p>idが指定されていません。</p>'; return; }
       const data = await fetchJSON('topics');
       const items = data.items || data;
       const item = items.find(x => x.id === id);
-      const container = document.querySelector(containerSelector);
-      if (!item) { container.innerHTML = '<p>記事が見つかりません。</p>'; return; }
+      if (!item) { if (container) container.innerHTML = '<p>記事が見つかりません。</p>'; return; }
       container.innerHTML = `
         <article class="card">
           <h2 id="topic-${escapeHtml(item.id)}">${escapeHtml(item.title)}</h2>
@@ -220,14 +217,16 @@ const main = (function () {
           <div class="content">${nl2br(escapeHtml(item.content || ''))}</div>
         </article>
       `;
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('renderTopicPage error', e); }
   }
 
+  // ---- Music list / track page ----
   async function renderMusicList(containerSelector) {
     try {
       const data = await fetchJSON('music');
       const items = sortByDateDesc(data.items || data);
       const container = document.querySelector(containerSelector);
+      if (!container) return;
       container.innerHTML = items.map(m => `
         <div class="item">
           <img src="${thumbOrPlaceholder(m.cover,96,96)}" alt="" class="thumb">
@@ -238,18 +237,18 @@ const main = (function () {
           </div>
         </div>
       `).join('');
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('renderMusicList error', e); }
   }
 
   async function renderTrackPage(containerSelector) {
-    const id = qParam('id');
-    if (!id) { document.querySelector(containerSelector).innerHTML = '<p>idが指定されていません。</p>'; return; }
     try {
+      const id = qParam('id');
+      const container = document.querySelector(containerSelector);
+      if (!id) { if (container) container.innerHTML = '<p>idが指定されていません。</p>'; return; }
       const data = await fetchJSON('music');
       const items = data.items || data;
       const item = items.find(x => x.id === id);
-      const container = document.querySelector(containerSelector);
-      if (!item) { container.innerHTML = '<p>曲が見つかりません。</p>'; return; }
+      if (!item) { if (container) container.innerHTML = '<p>曲が見つかりません。</p>'; return; }
 
       const disc = await fetchJSON('discography').catch(()=>({items:[]}));
 
@@ -283,70 +282,79 @@ const main = (function () {
           </section>
         </article>
       `;
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('renderTrackPage error', e); }
   }
 
+  // ---- Movie list / page (with links to tracks) ----
   async function renderMovieList(containerSelector) {
     try {
       const data = await fetchJSON('movies');
       const items = sortByDateDesc(data.items || data);
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
       const container = document.querySelector(containerSelector);
-      container.innerHTML = items.map(m => {
-        // Collect candidate references from multiple possible fields
-        const related = [];
-        if (m.track) related.push(m.track);
-        if (m.track_id) related.push(m.track_id);
-        if (Array.isArray(m.tracks)) {
-          m.tracks.forEach(t => {
-            if (typeof t === 'string') related.push(t);
-            if (t && t.id) related.push(t.id);
-            if (t && t.title) related.push(t.title);
-          });
+      if (!container) return;
+      const html = items.map(m => {
+        try {
+          // Collect candidate references from multiple possible fields
+          const related = [];
+          if (m.track) related.push(m.track);
+          if (m.track_id) related.push(m.track_id);
+          if (Array.isArray(m.tracks)) {
+            m.tracks.forEach(t => {
+              if (typeof t === 'string') related.push(t);
+              if (t && t.id) related.push(t.id);
+              if (t && t.title) related.push(t.title);
+            });
+          }
+          if (Array.isArray(m.track_ids)) m.track_ids.forEach(t => related.push(t));
+          if (Array.isArray(m.related_tracks)) m.related_tracks.forEach(t => related.push(t));
+          // fallback: title matching
+          if (related.length === 0 && musicData.items) {
+            const foundByTitle = (musicData.items || []).find(x => x.title === m.title || (m.title && x.title && x.title.includes(m.title)));
+            if (foundByTitle) related.push(foundByTitle.id);
+          }
+
+          const relatedHtmlArr = (related || []).map(r => {
+            const ref = findMusicRef(musicData.items || [], r);
+            if (ref) return `<a href="track.html?id=${ref.id}">${escapeHtml(ref.title)}</a>`;
+            console.debug('movie->track: no match for', r, 'in movie', m.id || m.title);
+            return null;
+          }).filter(Boolean);
+
+          const linksHtml = relatedHtmlArr.length ? `<p class="meta-small">関連曲: ${relatedHtmlArr.join(' ・ ')}</p>` : '';
+
+          return `
+            <div class="item">
+              <div class="meta">${m.date || ''}</div>
+              <div>
+                <div class="kicker"><a href="movie.html?id=${m.id}">${escapeHtml(m.title)}</a></div>
+                <div class="meta-small">${escapeHtml(m.service || '')} ${escapeHtml(m.uploader||'')}</div>
+                <div style="margin-top:.5rem">${m.video ? embedVideoHtml(m.video) : '<p>リンクのみ</p>'}</div>
+                ${linksHtml}
+                <p><a href="${m.url || '#'}" target="_blank" rel="noopener">動画ページへ</a></p>
+              </div>
+            </div>
+          `;
+        } catch (innerErr) {
+          console.error('renderMovieList: item render error', innerErr, m);
+          return '';
         }
-        if (Array.isArray(m.track_ids)) m.track_ids.forEach(t => related.push(t));
-        if (Array.isArray(m.related_tracks)) m.related_tracks.forEach(t => related.push(t));
-        // fallback: title matching
-        if (related.length === 0 && musicData.items) {
-          const foundByTitle = (musicData.items || []).find(x => x.title === m.title || (m.title && x.title && x.title.includes(m.title)));
-          if (foundByTitle) related.push(foundByTitle.id);
-        }
-
-        // Resolve to music items
-        const relatedHtmlArr = (related || []).map(r => {
-          const ref = findMusicRef(musicData.items || [], r);
-          if (ref) return `<a href="track.html?id=${ref.id}">${escapeHtml(ref.title)}</a>`;
-          console.debug('movie->track: no match for', r, 'in movie', m.id || m.title);
-          return null;
-        }).filter(Boolean);
-
-        const linksHtml = relatedHtmlArr.length ? `<p class="meta-small">関連曲: ${relatedHtmlArr.join(' ・ ')}</p>` : '';
-
-        return `
-        <div class="item">
-          <div class="meta">${m.date || ''}</div>
-          <div>
-            <div class="kicker"><a href="movie.html?id=${m.id}">${escapeHtml(m.title)}</a></div>
-            <div class="meta-small">${escapeHtml(m.service || '')} ${escapeHtml(m.uploader||'')}</div>
-            <div style="margin-top:.5rem">${m.video ? embedVideoHtml(m.video) : '<p>リンクのみ</p>'}</div>
-            ${linksHtml}
-            <p><a href="${m.url || '#'}" target="_blank" rel="noopener">動画ページへ</a></p>
-          </div>
-        </div>
-      `;
       }).join('');
-    } catch (e) { console.error(e); }
+      container.innerHTML = html;
+    } catch (e) {
+      console.error('renderMovieList error', e);
+    }
   }
 
   async function renderMoviePage(containerSelector) {
-    const id = qParam('id');
-    if (!id) { document.querySelector(containerSelector).innerHTML = '<p>idが指定されていません。</p>'; return; }
     try {
+      const id = qParam('id');
+      const container = document.querySelector(containerSelector);
+      if (!id) { if (container) container.innerHTML = '<p>idが指定されていません。</p>'; return; }
       const data = await fetchJSON('movies');
       const items = data.items || data;
       const item = items.find(x => x.id === id);
-      const container = document.querySelector(containerSelector);
-      if (!item) { container.innerHTML = '<p>動画が見つかりません。</p>'; return; }
+      if (!item) { if (container) container.innerHTML = '<p>動画が見つかりません。</p>'; return; }
 
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
 
@@ -399,14 +407,18 @@ const main = (function () {
           </section>
         </article>
       `;
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error('renderMoviePage error', e);
+    }
   }
 
+  // ---- Discography / Album ----
   async function renderDiscography(containerSelector) {
     try {
       const data = await fetchJSON('discography');
       const items = sortByDateDesc(data.items || data);
       const container = document.querySelector(containerSelector);
+      if (!container) return;
       container.innerHTML = items.map(a => `
         <article class="card">
           <div style="display:flex;gap:1rem;align-items:center;">
@@ -420,27 +432,27 @@ const main = (function () {
           </div>
         </article>
       `).join('');
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('renderDiscography error', e); }
   }
 
   async function renderAlbumPage(containerSelector) {
-    const id = qParam('id');
-    if (!id) { document.querySelector(containerSelector).innerHTML = '<p>id が指定されていません。</p>'; return; }
     try {
+      const id = qParam('id');
+      const container = document.querySelector(containerSelector);
+      if (!id) { if (container) container.innerHTML = '<p>id が指定されていません。</p>'; return; }
       const data = await fetchJSON('discography');
       const items = data.items || data;
       const album = items.find(x => x.id === id);
-      const container = document.querySelector(containerSelector);
-      if (!album) { container.innerHTML = '<p>アルバムが見つかりません。</p>'; return; }
+      if (!album) { if (container) container.innerHTML = '<p>アルバムが見つかりません。</p>'; return; }
 
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
       const trackHtml = (album.tracks || []).map(t => {
         const trackRef = (musicData.items||[]).find(m => m.id === t.id || m.title === t.title);
         if (trackRef) {
-          // 手動採番（例: 1. ）を残す（ol の自動マーカーは CSS で無効化する想定）
+          // 手動採番を残し、リンクは track.html?id=...
           return `<li>${escapeHtml(t.track_no || '')}. <a href="track.html?id=${trackRef.id}">${escapeHtml(trackRef.title)}</a> — ${escapeHtml(trackRef.composer || trackRef.author || '')}</li>`;
         } else {
-          // Discography 詳細ページではアイテムの内部 ID を表示しないようにする
+          // 非連携曲では内部IDの表示をしない
           return `<li>${escapeHtml(t.track_no || '')}. ${escapeHtml(t.title)} — ${escapeHtml(t.author || '')}</li>`;
         }
       }).join('');
@@ -465,14 +477,16 @@ const main = (function () {
           </section>
         </article>
       `;
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('renderAlbumPage error', e); }
   }
 
+  // ---- Live list / page ----
   async function renderLiveList(containerSelector) {
     try {
       const data = await fetchJSON('live');
       const items = sortByDateDesc(data.items || data);
       const container = document.querySelector(containerSelector);
+      if (!container) return;
       container.innerHTML = items.map(l => `
         <div class="item">
           <img src="${thumbOrPlaceholder(l.image,96,96)}" alt="" class="thumb">
@@ -483,30 +497,29 @@ const main = (function () {
           </div>
         </div>
       `).join('');
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error('renderLiveList error', e); }
   }
 
   async function renderLivePage(containerSelector) {
-    const id = qParam('id');
-    if (!id) { document.querySelector(containerSelector).innerHTML = '<p>idが指定されていません。</p>'; return; }
     try {
+      const id = qParam('id');
+      const container = document.querySelector(containerSelector);
+      if (!id) { if (container) container.innerHTML = '<p>idが指定されていません。</p>'; return; }
       const data = await fetchJSON('live');
       const item = (data.items || data).find(x => x.id === id);
-      const container = document.querySelector(containerSelector);
-      if (!item) { container.innerHTML = '<p>ライブ情報が見つかりません。</p>'; return; }
+      if (!item) { if (container) container.innerHTML = '<p>ライブ情報が見つかりません。</p>'; return; }
 
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
       const setlistHtml = (item.setlist || []).map((s, idx) => {
         const found = (musicData.items||[]).find(m => m.id === s.id || m.title === s.title);
         if (found) {
-          // 手動番号（idx+1）を残す
           return `<li>${idx+1}. <a href="track.html?id=${found.id}">${escapeHtml(found.title)}</a></li>`;
         } else {
           return `<li>${idx+1}. ${escapeHtml(s.title || s)}</li>`;
         }
       }).join('');
 
-      container.innerHTML = `
+      const containerHtml = `
         <article class="card">
           <h2 id="live-${escapeHtml(item.id)}">${escapeHtml(item.title)}</h2>
           <div class="meta-small">${item.date || ''} ・ ${escapeHtml(item.venue || '')}</div>
@@ -523,7 +536,8 @@ const main = (function () {
           </section>
         </article>
       `;
-    } catch (e) { console.error(e); }
+      container.innerHTML = containerHtml;
+    } catch (e) { console.error('renderLivePage error', e); }
   }
 
   // Utilities
