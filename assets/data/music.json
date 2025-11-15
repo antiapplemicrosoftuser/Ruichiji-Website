@@ -6,7 +6,7 @@
       "title": "Try Again! (a cappella)",
       "duration": "4:25",
       "credits": ["Music: Ruichiji", "Lyrics: Ruichiji"],
-      "lyrics": "（サンプル歌詞）\n夜の海を渡り\n星が導く方へ\n僕らは進む…",
+      "lyricsFile": "lyrics/20250222-that_day_sky.txt",
       "albums": []
     },
     {
@@ -15,7 +15,7 @@
       "title": "あの日の空 (a cappella)",
       "duration": "5:06",
       "credits": ["Music: Ruichiji", "Lyrics: Ruichiji"],
-      "lyrics": "",
+      "lyricsFile": "lyrics/20250825-try_again.txt",
       "albums": []
     }
   ]
