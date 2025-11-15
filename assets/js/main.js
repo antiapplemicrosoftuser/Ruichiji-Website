@@ -118,6 +118,17 @@ const main = (function () {
     return null;
   }
 
+  // New: only match by ID (exact or case-insensitive). Use this when we should create links only if movie provides an ID.
+  function findMusicById(musicItems = [], ref) {
+    if (!ref) return null;
+    const r = String(ref).trim();
+    let found = (musicItems || []).find(x => x.id === r);
+    if (found) return found;
+    found = (musicItems || []).find(x => x.id && x.id.toLowerCase() === r.toLowerCase());
+    if (found) return found;
+    return null;
+  }
+
   function embedVideoHtml(url) {
     if (!url) return '';
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
@@ -285,7 +296,7 @@ const main = (function () {
     } catch (e) { console.error('renderTrackPage error', e); }
   }
 
-  // ---- Movie list / page (with links to tracks) ----
+  // ---- Movie list / page (link only when ID matches) ----
   async function renderMovieList(containerSelector) {
     try {
       const data = await fetchJSON('movies');
@@ -296,32 +307,28 @@ const main = (function () {
       const html = items.map(m => {
         try {
           // Collect candidate references from multiple possible fields
-          const related = [];
-          if (m.track) related.push(m.track);
-          if (m.track_id) related.push(m.track_id);
+          const relatedCandidates = [];
+          if (m.track) relatedCandidates.push(m.track);
+          if (m.track_id) relatedCandidates.push(m.track_id);
           if (Array.isArray(m.tracks)) {
             m.tracks.forEach(t => {
-              if (typeof t === 'string') related.push(t);
-              if (t && t.id) related.push(t.id);
-              if (t && t.title) related.push(t.title);
+              if (typeof t === 'string') relatedCandidates.push(t);
+              if (t && t.id) relatedCandidates.push(t.id);
+              if (t && t.title) relatedCandidates.push(t.title);
             });
           }
-          if (Array.isArray(m.track_ids)) m.track_ids.forEach(t => related.push(t));
-          if (Array.isArray(m.related_tracks)) m.related_tracks.forEach(t => related.push(t));
-          // fallback: title matching
-          if (related.length === 0 && musicData.items) {
-            const foundByTitle = (musicData.items || []).find(x => x.title === m.title || (m.title && x.title && x.title.includes(m.title)));
-            if (foundByTitle) related.push(foundByTitle.id);
-          }
+          if (Array.isArray(m.track_ids)) m.track_ids.forEach(t => relatedCandidates.push(t));
+          if (Array.isArray(m.related_tracks)) m.related_tracks.forEach(t => relatedCandidates.push(t));
 
-          const relatedHtmlArr = (related || []).map(r => {
-            const ref = findMusicRef(musicData.items || [], r);
-            if (ref) return `<a href="track.html?id=${ref.id}">${escapeHtml(ref.title)}</a>`;
-            console.debug('movie->track: no match for', r, 'in movie', m.id || m.title);
+          // IMPORTANT: only create links when movie-provided reference matches a music.id (exact or case-insensitive).
+          const relatedLinks = (relatedCandidates || []).map(ref => {
+            const refItem = findMusicById(musicData.items || [], ref);
+            if (refItem) return `<a href="track.html?id=${refItem.id}">${escapeHtml(refItem.title)}</a>`;
+            // no link if id does not match; do not fallback to title-based linking here
             return null;
           }).filter(Boolean);
 
-          const linksHtml = relatedHtmlArr.length ? `<p class="meta-small">関連曲: ${relatedHtmlArr.join(' ・ ')}</p>` : '';
+          const linksHtml = relatedLinks.length ? `<p class="meta-small">関連曲: ${relatedLinks.join(' ・ ')}</p>` : '';
 
           return `
             <div class="item">
@@ -358,37 +365,26 @@ const main = (function () {
 
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
 
-      // Collect related ids/titles from multiple possible fields
-      const relatedIds = [];
-      if (item.track) relatedIds.push(item.track);
-      if (item.track_id) relatedIds.push(item.track_id);
+      // Collect candidate references from multiple possible fields
+      const relatedCandidates = [];
+      if (item.track) relatedCandidates.push(item.track);
+      if (item.track_id) relatedCandidates.push(item.track_id);
       if (Array.isArray(item.tracks)) {
         item.tracks.forEach(t => {
-          if (typeof t === 'string') relatedIds.push(t);
-          if (t && t.id) relatedIds.push(t.id);
-          if (t && t.title) relatedIds.push(t.title);
+          if (typeof t === 'string') relatedCandidates.push(t);
+          if (t && t.id) relatedCandidates.push(t.id);
+          if (t && t.title) relatedCandidates.push(t.title);
         });
       }
-      if (Array.isArray(item.track_ids)) item.track_ids.forEach(t => relatedIds.push(t));
-      if (Array.isArray(item.related_tracks)) item.related_tracks.forEach(t => relatedIds.push(t));
+      if (Array.isArray(item.track_ids)) item.track_ids.forEach(t => relatedCandidates.push(t));
+      if (Array.isArray(item.related_tracks)) item.related_tracks.forEach(t => relatedCandidates.push(t));
 
-      // fallback: detect by title similarity
-      if (relatedIds.length === 0 && musicData.items) {
-        (musicData.items||[]).forEach(m => {
-          if (item.title && m.title && (m.title === item.title || m.title.includes(item.title) || item.title.includes(m.title))) {
-            relatedIds.push(m.id);
-          }
-        });
-      }
-
-      const relatedHtml = (relatedIds || []).map(rid => {
-        const ref = findMusicRef(musicData.items||[], rid);
-        if (ref) {
-          return `<li><a href="track.html?id=${ref.id}">${escapeHtml(ref.title)}</a></li>`;
-        } else {
-          console.debug('movie page: no match for related reference', rid, 'movie=', item.id || item.title);
-          return '';
-        }
+      // Only create links for ID matches
+      const relatedHtml = (relatedCandidates || []).map(ref => {
+        const refItem = findMusicById(musicData.items || [], ref);
+        if (refItem) return `<li><a href="track.html?id=${refItem.id}">${escapeHtml(refItem.title)}</a></li>`;
+        // If not ID-match, don't create link (you can show plain text if desired)
+        return '';
       }).filter(Boolean).join('');
 
       container.innerHTML = `
