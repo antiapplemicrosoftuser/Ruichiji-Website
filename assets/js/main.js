@@ -131,6 +131,7 @@ const main = (function () {
 
   function embedVideoHtml(url) {
     if (!url) return '';
+    // YouTube
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       let id = null;
       if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1].split(/[?&]/)[0];
@@ -142,9 +143,24 @@ const main = (function () {
       const embed = `https://www.youtube.com/embed/${id}`;
       return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe src="${embed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe></div>`;
     }
-    if (url.includes('nicovideo.jp') || url.includes('nico.ms')) {
-      return `<p><a href="${url}" target="_blank" rel="noopener">ニコニコ動画で見る</a></p>`;
+
+    // NicoNico - try to extract id and embed
+    // examples:
+    // https://www.nicovideo.jp/watch/sm12345678  -> sm12345678
+    // https://nico.ms/sm12345678                -> sm12345678
+    try {
+      const nicoMatch = url.match(/(?:nicovideo\.jp\/watch\/|nico\.ms\/)([a-z0-9]+(?:[0-9]*))/i);
+      if (nicoMatch && nicoMatch[1]) {
+        const nid = nicoMatch[1];
+        const embed = `https://embed.nicovideo.jp/watch/${nid}`;
+        return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe src="${embed}" frameborder="0" scrolling="no" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe></div>`;
+      }
+    } catch (e) {
+      // fall through to link fallback
+      console.debug('embedVideoHtml: nico embed extraction failed', e, url);
     }
+
+    // Fallback: plain link
     return `<p><a href="${url}" target="_blank" rel="noopener">${escapeHtml(url)}</a></p>`;
   }
 
@@ -310,7 +326,6 @@ const main = (function () {
           const relatedCandidates = [];
           if (m.musicID) relatedCandidates.push(m.musicID);
           if (Array.isArray(m.musicIDs)) m.musicIDs.forEach(t => relatedCandidates.push(t));
-          // also support tracks array with musicID per track object
           if (Array.isArray(m.tracks)) {
             m.tracks.forEach(t => {
               if (t && t.musicID) relatedCandidates.push(t.musicID);
@@ -334,9 +349,8 @@ const main = (function () {
                 <div class="meta-small">${escapeHtml(m.service || '')} ${escapeHtml(m.uploader||'')}</div>
                 <div style="margin-top:.5rem">${m.video ? embedVideoHtml(m.video) : '<p>リンクのみ</p>'}</div>
                 ${linksHtml}
-                <p><a href="${m.url || '#'}" target="_blank" rel="noopener">動画ページへ</a></p>
-              </div>
             </div>
+          </div>
           `;
         } catch (innerErr) {
           console.error('renderMovieList: item render error', innerErr, m);
