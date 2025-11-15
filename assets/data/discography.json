@@ -8,10 +8,10 @@
       "artists": ["Ruichiji"],
       "description": "内なるMellowを集めました。",
       "tracks": [
-        { "track_no": 1, "title": "NEVER BE", "musicID": "xxx_never_be", "author": "Ruichiji" },
-        { "track_no": 2, "title": "もう一度", "musicID": "xxx_one_more", "author": "Ruichiji" },
-        { "track_no": 3, "title": "偽り", "musicID": "xxx_lie", "author": "Ruichiji" },
-        { "track_no": "Ex", "title": "ラブソングを聴かせて", "musicID": "xxx_love_song", "author": "Ruichiji" }
+        { "track_no": 1, "title": "NEVER BE", "musicID": "20251026-never_be", "author": "Ruichiji" },
+        { "track_no": 2, "title": "もう一度", "musicID": "20251026-one_more", "author": "Ruichiji" },
+        { "track_no": 3, "title": "偽り", "musicID": "20251026-lie", "author": "Ruichiji" },
+        { "track_no": "Ex", "title": "ラブソングを聴かせて", "musicID": "20251026-love_song", "author": "Ruichiji" }
       ]
     }
   ]

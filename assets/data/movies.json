@@ -1,25 +1,26 @@
 {
   "items": [
     {
-      "id": "v2025-07-mv-hoshi",
-      "date": "2025-07-15",
-      "title": "『星の航海』Music Video",
-      "service": "YouTube",
-      "uploader": "Official Channel",
-      "video": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "description": "最新シングル『星の航海』のミュージックビデオ。",
-      "musicID": "m001-hoshinokoukai"
+      "id": "v2025-08-try_again",
+      "date": "2025-08-25",
+      "title": "Try Again! (a cappella)",
+      "service": "ニコニコ動画",
+      "uploader": "Ruichiji",
+      "video": "https://www.nicovideo.jp/watch/sm45334951",
+      "url": "https://www.nicovideo.jp/watch/sm45334951",
+      "description": "Try Again! (a cappella) Music Video",
+      "musicID": "20250825-try_again"
     },
     {
-      "id": "v2024-12-liveclip",
-      "date": "2024-12-20",
-      "title": "Live Clip 2024",
+      "id": "v2025-02-that_day_sky",
+      "date": "2025-02-22",
+      "title": "あの日の空 (a cappella)",
       "service": "ニコニコ動画",
-      "uploader": "Official",
-      "video": "https://www.nicovideo.jp/watch/sm12345678",
-      "url": "https://www.nicovideo.jp/watch/sm12345678",
-      "description": "2024年ツアーのハイライト映像。"
+      "uploader": "Ruichiji",
+      "video": "https://www.nicovideo.jp/watch/sm44683123",
+      "url": "https://www.nicovideo.jp/watch/sm44683123",
+      "description": "あの日の空 (a cappella) Music Video",
+      "musicID": "20250222-that_day_sky"
     }
   ]
 }

@@ -1,24 +1,20 @@
 {
   "items": [
     {
-      "id": "m001-hoshinokoukai",
-      "date": "2025-11-01",
-      "title": "星の航海",
-      "duration": "4:12",
-      "audio": "https://www.w3schools.com/html/horse.mp3",
-      "cover": "https://via.placeholder.com/300x300?text=星の航海",
-      "credits": ["作曲: Name Surname", "編曲: Collaborator A", "演奏: Band X"],
+      "id": "20250825-try_again",
+      "date": "2025-08-25",
+      "title": "Try Again! (a cappella)",
+      "duration": "4:25",
+      "credits": ["Music: Ruichiji", "Lyrics: Ruichiji"],
       "lyrics": "（サンプル歌詞）\n夜の海を渡り\n星が導く方へ\n僕らは進む…",
-      "albums": ["al001-ocean-dream"]
+      "albums": []
     },
     {
-      "id": "m002-ambient-sky",
-      "date": "2025-06-20",
-      "title": "Ambient Sky",
-      "duration": "6:30",
-      "note": "BGM用途のインストゥルメンタル。再生はサンプル無し。",
-      "cover": "https://via.placeholder.com/300x300?text=Ambient+Sky",
-      "credits": ["作曲/演奏: Name Surname"],
+      "id": "20250222-that_day_sky",
+      "date": "2025-02-22",
+      "title": "あの日の空 (a cappella)",
+      "duration": "5:06",
+      "credits": ["Music: Ruichiji", "Lyrics: Ruichiji"],
       "lyrics": "",
       "albums": []
     }
