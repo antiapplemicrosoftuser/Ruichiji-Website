@@ -297,14 +297,19 @@ const main = (function () {
                 ${latest.video ? embedVideoHtml(latest.video) : `<p>${escapeHtml(truncate(latest.description||'',120))}</p>`}
                 <p><a href="movie.html">動画一覧へ</a></p>`;
       } else if (kind === 'discography') {
-        html = `<img src="${thumbOrPlaceholder(latest.cover,120,120)}" alt="" class="thumb" style="float:left;margin-right:12px">
-                <div class="kicker"><a href="album.html?id=${encodeURIComponent(latest.id)}">${escapeHtml(latest.title)}</a></div>
-                <div class="meta-small">参加: ${escapeHtml((latest.artists||[]).join(', '))}</div>
-                <p>${escapeHtml(latest.description||'（説明未設定）')}</p>
-                <p><a href="discography.html">Discography一覧へ</a></p>
-                <div style="clear:both"></div>`;
+        // image + link grouped on left, details on right
+        html = `
+          <div style="float:left;margin-right:12px;text-align:center;">
+            <img src="${thumbOrPlaceholder(latest.cover,120,120)}" alt="" class="thumb" style="display:block;margin-bottom:8px">
+            <div><a href="discography.html">Discography一覧へ</a></div>
+          </div>
+          <div style="overflow:hidden;">
+            <div class="kicker"><a href="album.html?id=${encodeURIComponent(latest.id)}">${escapeHtml(latest.title)}</a></div>
+            <div class="meta-small">参加: ${escapeHtml((latest.artists||[]).join(', '))}</div>
+            <p>${escapeHtml(latest.description||'（説明未設定）')}</p>
+          </div>
+          <div style="clear:both"></div>`;
       } else if (kind === 'live') {
-        // Home の Live 欄: タイトルに個別ページリンクを埋め、下に一覧へのリンクを表示する
         html = `<img src="${thumbOrPlaceholder(latest.image,160,90)}" alt="" class="thumb" style="float:left;margin-right:12px">
                 <div class="kicker"><a href="live-event.html?id=${encodeURIComponent(latest.id)}">${escapeHtml(latest.title)}</a></div>
                 <div class="meta-small">${latest.date || ''} ・ ${escapeHtml(latest.venue||'')}</div>
