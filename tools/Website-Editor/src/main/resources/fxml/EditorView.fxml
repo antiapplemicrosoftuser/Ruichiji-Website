@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.ruichiji.controller.EditorController" spacing="8" style="-fx-padding:12;">
+  <GridPane hgap="8" vgap="8">
+    <Label text="ID:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+    <TextField fx:id="tfId" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+    <Label text="Title:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+    <TextField fx:id="tfTitle" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+    <Label text="Date:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+    <TextField fx:id="tfDate" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+    <Label text="Cover:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+    <HBox spacing="6" GridPane.rowIndex="3" GridPane.columnIndex="1">
+      <TextField fx:id="tfCover" HBox.hgrow="ALWAYS"/>
+      <Button text="Choose" onAction="#onChooseCover"/>
+    </HBox>
+
+    <Label text="Description:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+    <TextArea fx:id="taDescription" GridPane.rowIndex="4" GridPane.columnIndex="1" prefRowCount="3"/>
+  </GridPane>
+
+  <SplitPane orientation="HORIZONTAL" prefHeight="360">
+    <VBox spacing="6" prefWidth="400" style="-fx-padding:6;">
+      <Label text="Lyrics (Markdown)"/>
+      <TextArea fx:id="taLyrics" prefHeight="100%" wrapText="true"/>
+    </VBox>
+    <VBox spacing="6" style="-fx-padding:6;" prefWidth="400">
+      <Label text="Preview"/>
+      <WebView fx:id="wvPreview" prefHeight="100%"/>
+    </VBox>
+  </SplitPane>
+
+  <Label text="Raw JSON:"/>
+  <TextArea fx:id="taRawJson" prefRowCount="6"/>
+
+  <HBox spacing="8" alignment="CENTER_RIGHT">
+    <Button text="Save" onAction="#onSave"/>
+    <Button text="Cancel" onAction="#onCancel"/>
+  </HBox>
+</VBox>
