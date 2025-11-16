@@ -168,9 +168,12 @@ const main = (function () {
     });
   }
 
+  // Default cover image path (relative to baseAssets)
+  const DEFAULT_COVER_PATH = baseAssets + 'images/default-cover.svg';
+
   function thumbOrPlaceholder(url, w = 200, h = 200) {
-    // Default cover image path (relative to baseAssets)
-    const DEFAULT_COVER_PATH = baseAssets + 'images/default-cover.svg';
+    // If a URL is provided, use it; otherwise use the repository default cover image.
+    // This keeps behavior simple and ensures a consistent fallback across the site.
     if (url) return url;
     return DEFAULT_COVER_PATH;
   }
@@ -295,17 +298,18 @@ const main = (function () {
                 <p><a href="movie.html">動画一覧へ</a></p>`;
       } else if (kind === 'discography') {
         html = `<img src="${thumbOrPlaceholder(latest.cover,120,120)}" alt="" class="thumb" style="float:left;margin-right:12px">
-                <div class="kicker">${escapeHtml(latest.title)}</div>
+                <div class="kicker"><a href="album.html?id=${encodeURIComponent(latest.id)}">${escapeHtml(latest.title)}</a></div>
                 <div class="meta-small">参加: ${escapeHtml((latest.artists||[]).join(', '))}</div>
                 <p>${escapeHtml(latest.description||'（説明未設定）')}</p>
-                <p><a href="${linkPrefix + latest.id}">アルバムページへ</a></p>
+                <p><a href="discography.html">Discography一覧へ</a></p>
                 <div style="clear:both"></div>`;
       } else if (kind === 'live') {
+        // Home の Live 欄: タイトルに個別ページリンクを埋め、下に一覧へのリンクを表示する
         html = `<img src="${thumbOrPlaceholder(latest.image,160,90)}" alt="" class="thumb" style="float:left;margin-right:12px">
-                <div class="kicker">${escapeHtml(latest.title)}</div>
+                <div class="kicker"><a href="live-event.html?id=${encodeURIComponent(latest.id)}">${escapeHtml(latest.title)}</a></div>
                 <div class="meta-small">${latest.date || ''} ・ ${escapeHtml(latest.venue||'')}</div>
                 <p>${escapeHtml(truncate(latest.note||'',120))}</p>
-                <p><a href="${linkPrefix + latest.id}">公演ページへ</a></p>
+                <p><a href="live.html">Live一覧へ</a></p>
                 <div style="clear:both"></div>`;
       }
       container.innerHTML = html;
