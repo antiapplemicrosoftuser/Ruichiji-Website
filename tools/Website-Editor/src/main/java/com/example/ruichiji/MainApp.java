@@ -2,6 +2,7 @@ package com.example.ruichiji;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -16,7 +17,7 @@ public class MainApp extends Application {
             throw new IOException("MainView.fxml not found in resources/fxml");
         }
         FXMLLoader loader = new FXMLLoader(fxml);
-        var root = loader.load();
+        Parent root = loader.load(); // 明示的に Parent 型で受ける
         primaryStage.setTitle("Website-Editor");
         primaryStage.setScene(new Scene(root, 1000, 700));
         primaryStage.show();

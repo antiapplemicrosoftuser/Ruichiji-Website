@@ -3,14 +3,14 @@ package com.example.ruichiji.controller;
 import com.example.ruichiji.service.DataService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * MainController: holds 5 tabs and loads a ListView into each, injecting DataService and kind.
@@ -47,7 +47,7 @@ public class MainController {
             try {
                 URL fxml = getClass().getResource("/fxml/ListView.fxml");
                 FXMLLoader loader = new FXMLLoader(fxml);
-                AnchorPane content = loader.load();
+                Parent content = loader.load(); // Parent にして型を固定しない
                 ListController lc = loader.getController();
                 lc.setDataService(dataService);
                 lc.setKind(kind);

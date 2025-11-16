@@ -122,6 +122,13 @@ public class ListController {
         }
     }
 
+    // <-- 追加: FXML の btnRefresh が onAction="#onRefresh" を指しているためハンドラを実装
+    @FXML
+    private void onRefresh() {
+        refreshList();
+    }
+    // -->
+
     private void openEditorFor(ObjectNode node, boolean isNew) {
         if (dataService == null || kind == null) {
             showAlert("設定エラー", "DataService または kind が設定されていません。");
