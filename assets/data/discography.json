@@ -1,18 +1,135 @@
 {
-  "items": [
-    {
-      "id": "ep0001-mellowers",
-      "title": "Mellowers",
-      "date": "2025-10-26",
-      "cover": "https://pbs.twimg.com/media/G33DCpoXoAAXoP-?format=jpg&name=medium",
-      "artists": ["Ruichiji"],
-      "description": "内なるMellowを集めました。",
-      "tracks": [
-        { "track_no": 1, "title": "NEVER BE", "musicID": "20251026-never_be", "author": "Ruichiji" },
-        { "track_no": 2, "title": "もう一度", "musicID": "20251026-one_more", "author": "Ruichiji" },
-        { "track_no": 3, "title": "偽り", "musicID": "20251026-itsuwari", "author": "Ruichiji" },
-        { "track_no": "Ex", "title": "ラブソングを聴かせて", "musicID": "20251026-love_song", "author": "Ruichiji" }
-      ]
-    }
-  ]
+  "items" : [ {
+    "id" : "album0002-trashbox_vocaledition",
+    "title" : "Trash Box Vocal Edition",
+    "date" : "2025-10-26",
+    "description" : "Trash Box 2nd Album",
+    "cover" : "https://f4.bcbits.com/img/a3948316627_16.jpg",
+    "artists" : [ "Ruichiji", "sayutta", "anachlon", "Mizuhane" ],
+    "tracks" : [ {
+      "track_no" : "Trash 1",
+      "title" : "WIND",
+      "musicID" : "20251026-wind",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 2",
+      "title" : "偽り",
+      "musicID" : "20251026-itsuwari",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 3",
+      "title" : "Seek My Light",
+      "author" : "sayutta suimit"
+    }, {
+      "track_no" : "Trash 4",
+      "title" : "星空の街",
+      "musicID" : "20241027-hoshizora",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 5",
+      "title" : "夢の果て",
+      "musicID" : "20250426-Yumenohate",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 6",
+      "title" : "Over the World",
+      "musicID" : "20250426-over_the_world",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 7",
+      "title" : "夜も眠らず夢を見ていた GameEdit",
+      "author" : "sayutta suimit"
+    }, {
+      "track_no" : "Trash 8",
+      "title" : "Remember Unlimited Memories (short)",
+      "musicID" : "20250426-Remember_Unlimited_Memories",
+      "author" : "Mizuhane, Ruichiji"
+    }, {
+      "track_no" : "Trash 9",
+      "title" : "DeLeTeD CoLoR",
+      "author" : "sayutta suimit"
+    }, {
+      "track_no" : "Trash 10",
+      "title" : "For Your Love",
+      "author" : "anachlon"
+    }, {
+      "track_no" : "Trash 11",
+      "title" : "あの日の空 (a cappella)",
+      "musicID" : "20250222-that_day_sky",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 12",
+      "title" : "Try Again! (a cappella)",
+      "musicID" : "20250825-try_again",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 13",
+      "title" : "Miracle Moments",
+      "musicID" : "20251026-miracle_moments",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 14",
+      "title" : "Mysterious Wander",
+      "musicID" : "20251026-mysterious_wander",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 15",
+      "title" : "Panic Magic!",
+      "musicID" : "20251026-panic_magic",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 16",
+      "title" : "もう一度",
+      "musicID" : "20251026-one_more",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 17",
+      "title" : "Last Night",
+      "musicID" : "20251026-last_night",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 18",
+      "title" : "Save you",
+      "musicID" : "20251026-save_you",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 19",
+      "title" : "ラブソングを聴かせて",
+      "musicID" : "20251026-love_song",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Trash 20",
+      "title" : "HAMO Reason",
+      "musicID" : "20251026-hamo_reason",
+      "author" : "Ruichiji"
+    } ]
+  }, {
+    "id" : "ep0001-mellowers",
+    "title" : "Mellowers",
+    "date" : "2025-10-26",
+    "cover" : "https://pbs.twimg.com/media/G33DCpoXoAAXoP-?format=jpg&name=medium",
+    "artists" : [ "Ruichiji" ],
+    "description" : "内なるMellowを集めました。",
+    "tracks" : [ {
+      "track_no" : 1,
+      "title" : "NEVER BE",
+      "musicID" : "20251026-never_be",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : 2,
+      "title" : "もう一度",
+      "musicID" : "20251026-one_more",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : 3,
+      "title" : "偽り",
+      "musicID" : "20251026-itsuwari",
+      "author" : "Ruichiji"
+    }, {
+      "track_no" : "Ex",
+      "title" : "ラブソングを聴かせて",
+      "musicID" : "20251026-love_song",
+      "author" : "Ruichiji"
+    } ]
+  } ]
 }
