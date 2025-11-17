@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.web.*?>
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.ruichiji.controller.EditorController" spacing="8" style="-fx-padding:12;">
   <GridPane hgap="8" vgap="8">
     <Label text="ID:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
@@ -18,18 +19,19 @@
       <Button text="Choose" onAction="#onChooseCover"/>
     </HBox>
 
-    <Label text="Description:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+    <!-- Changed: give this label an fx:id so controller can change it to "Content" for topics -->
+    <Label fx:id="lblDescription" text="Description:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
     <TextArea fx:id="taDescription" GridPane.rowIndex="4" GridPane.columnIndex="1" prefRowCount="3"/>
   </GridPane>
 
   <SplitPane orientation="HORIZONTAL" prefHeight="360">
     <VBox spacing="6" prefWidth="400" style="-fx-padding:6;">
       <Label text="Lyrics (Markdown)"/>
-      <TextArea fx:id="taLyrics" prefHeight="100%" wrapText="true"/>
+      <TextArea fx:id="taLyrics" wrapText="true" VBox.vgrow="ALWAYS"/>
     </VBox>
     <VBox spacing="6" style="-fx-padding:6;" prefWidth="400">
       <Label text="Preview"/>
-      <WebView fx:id="wvPreview" prefHeight="100%"/>
+      <WebView fx:id="wvPreview" VBox.vgrow="ALWAYS"/>
     </VBox>
   </SplitPane>
 

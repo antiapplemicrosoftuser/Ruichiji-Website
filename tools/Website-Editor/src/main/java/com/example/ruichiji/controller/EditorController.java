@@ -1,38 +1,44 @@
 package com.example.ruichiji.controller;
 
 import com.example.ruichiji.service.DataService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.parser.Parser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.web.WebView;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Simple editor controller that supports different JSON schemas.
+ * It maps the "body" field to either "description" (default) or "content" for topics.
+ * Also updates the UI label to "Content" when editing topics.
+ */
 public class EditorController {
+
     @FXML private TextField tfId;
     @FXML private TextField tfTitle;
     @FXML private TextField tfDate;
     @FXML private TextField tfCover;
-    @FXML private TextArea taDescription;
+    @FXML private TextArea taDescription; // shown as "Description" in UI, may map to "content" for topics
     @FXML private TextArea taLyrics;
     @FXML private WebView wvPreview;
     @FXML private TextArea taRawJson;
+    @FXML private Label lblDescription; // new: label to switch text to "Content" for topics
 
     private DataService dataService;
     private String kind;
-    private ObjectNode item;
+    private ObjectNode current;
     private boolean isNew;
-
-    private final Parser mdParser = Parser.builder().build();
-    private final HtmlRenderer mdRenderer = HtmlRenderer.builder().build();
     private final ObjectMapper mapper = new ObjectMapper();
+
+    // Which JSON key to use for the "description" textarea
+    // default: "description"; for topics: "content"
+    private String contentKey = "description";
 
     public void setDataService(DataService ds) {
         this.dataService = ds;
@@ -40,122 +46,144 @@ public class EditorController {
 
     public void setKind(String kind) {
         this.kind = kind;
+        if ("topics".equals(kind)) {
+            this.contentKey = "content";
+            if (lblDescription != null) lblDescription.setText("Content:");
+        } else {
+            this.contentKey = "description";
+            if (lblDescription != null) lblDescription.setText("Description:");
+        }
     }
 
+    /**
+     * node may be null for new item
+     */
     public void setItem(ObjectNode node, boolean isNew) {
+        this.current = node;
         this.isNew = isNew;
-        if (isNew || node == null) {
-            this.item = mapper.createObjectNode();
-            tfId.setDisable(false);
+        populateFields();
+    }
+
+    private void populateFields() {
+        if (lblDescription != null) {
+            // ensure label matches kind even if populateFields called after setKind
+            if ("topics".equals(kind)) lblDescription.setText("Content:");
+            else lblDescription.setText("Description:");
+        }
+
+        if (current == null) {
             tfId.setText("");
             tfTitle.setText("");
             tfDate.setText("");
             tfCover.setText("");
             taDescription.setText("");
             taLyrics.setText("");
-            taRawJson.setText("{}");
-        } else {
-            this.item = node;
-            tfId.setText(getText(item, "id"));
-            tfId.setDisable(true);
-            tfTitle.setText(getText(item, "title"));
-            tfDate.setText(getText(item, "date"));
-            tfCover.setText(getText(item, "cover"));
-            taDescription.setText(getText(item, "description"));
-            taLyrics.setText(getText(item, "lyrics"));
-            try {
-                taRawJson.setText(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(item));
-            } catch (Exception e) {
-                taRawJson.setText("{}");
-            }
+            taRawJson.setText("");
+            tfId.setEditable(true); // new item -> allow editing id
+            return;
         }
+        tfId.setText(getText(current, "id"));
+        tfTitle.setText(getText(current, "title"));
+        tfDate.setText(getText(current, "date"));
+        tfCover.setText(getText(current, "cover"));
 
-        renderPreview(taLyrics.getText());
-        taLyrics.textProperty().addListener(obs -> renderPreview(taLyrics.getText()));
-    }
-
-    private static String getText(ObjectNode n, String key) {
-        var node = n.get(key);
-        return (node != null && !node.isNull()) ? node.asText("") : "";
-    }
-
-    @FXML public void onChooseCover() {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Choose image");
-        File f = chooser.showOpenDialog(tfId.getScene().getWindow());
-        if (f != null && dataService != null) {
-            try {
-                var dest = dataService.importImage(f);
-                tfCover.setText(dest.toString().replace('\\','/'));
-            } catch (IOException e) {
-                e.printStackTrace();
-                showAlert("画像インポート失敗", e.getMessage());
-            }
+        // Prefer the mapped contentKey (e.g. "content" for topics). If absent, fallback to "description".
+        String body = getText(current, contentKey);
+        if (body.isEmpty() && !"description".equals(contentKey)) {
+            body = getText(current, "description");
         }
-    }
+        taDescription.setText(body);
 
-    @FXML public void onSave() {
+        // lyrics may not exist for topics, but fill if present
+        taLyrics.setText(getText(current, "lyrics"));
+
         try {
-            String id = tfId.getText().trim();
-            if (id.isEmpty()) { showAlert("Validation", "ID は必須です"); return; }
+            taRawJson.setText(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(current));
+        } catch (Exception ex) {
+            taRawJson.setText(current.toString());
+        }
 
+        // If editing an existing item, prevent changing the id to avoid accidental id changes.
+        tfId.setEditable(isNew);
+    }
+
+    @FXML
+    private void onSave() {
+        if (dataService == null || kind == null) {
+            showAlert("設定エラー", "DataService または kind が設定されていません。");
+            return;
+        }
+        try {
+            // Load list
             List<ObjectNode> list = dataService.readList(kind);
 
-            if (isNew) {
-                boolean exists = list.stream().anyMatch(x -> id.equals(getText(x, "id")));
-                if (exists) { showAlert("Validation", "同じ ID の項目が既に存在します"); return; }
+            // Ensure current node exists
+            ObjectNode node = current;
+            if (node == null) {
+                node = mapper.createObjectNode();
             }
 
-            item.put("id", id);
-            item.put("title", tfTitle.getText().trim());
-            item.put("date", tfDate.getText().trim());
-            item.put("cover", tfCover.getText().trim());
-            item.put("description", taDescription.getText());
-            item.put("lyrics", taLyrics.getText());
+            node.put("id", tfId.getText() == null ? "" : tfId.getText());
+            node.put("title", tfTitle.getText() == null ? "" : tfTitle.getText());
+            node.put("date", tfDate.getText() == null ? "" : tfDate.getText());
+            node.put("cover", tfCover.getText() == null ? "" : tfCover.getText());
 
-            try {
-                var other = (ObjectNode) mapper.readTree(taRawJson.getText());
-                other.fields().forEachRemaining(entry -> {
-                    String k = entry.getKey();
-                    if (!k.equals("id") && !k.equals("title") && !k.equals("date") && !k.equals("cover") && !k.equals("description") && !k.equals("lyrics")) {
-                        item.set(k, entry.getValue());
-                    }
-                });
-            } catch (Exception e) {
-                // ignore parse errors in raw JSON
+            // write body to the mapped key
+            node.put(contentKey, taDescription.getText() == null ? "" : taDescription.getText());
+
+            // optional: keep description too for non-topics, or keep both
+            if (!"content".equals(contentKey)) {
+                node.put("description", taDescription.getText() == null ? "" : taDescription.getText());
             }
 
-            if (isNew) {
-                list.add(item);
-            } else {
-                for (int i = 0; i < list.size(); i++) {
-                    if (getText(list.get(i), "id").equals(id)) {
-                        list.set(i, item);
-                        break;
-                    }
+            // lyrics/raw json handling (if applicable)
+            if (taLyrics.getText() != null && !taLyrics.getText().isBlank()) {
+                node.put("lyrics", taLyrics.getText());
+            }
+
+            // Update or insert
+            boolean replaced = false;
+            for (int i = 0; i < list.size(); i++) {
+                JsonNode e = list.get(i);
+                String id = getText((ObjectNode) e, "id");
+                if (id.equals(node.get("id").asText())) {
+                    list.set(i, node);
+                    replaced = true;
+                    break;
                 }
+            }
+            if (!replaced) {
+                // prepend new items
+                list.add(0, node);
             }
 
             dataService.writeList(kind, list);
-            closeWindow();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("保存エラー", e.getMessage());
+
+            // Close window
+            Window w = tfId.getScene().getWindow();
+            if (w instanceof Stage) ((Stage) w).close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            showAlert("保存エラー", ex.getMessage());
         }
     }
 
-    @FXML public void onCancel() {
-        closeWindow();
+    @FXML
+    private void onCancel() {
+        Window w = tfId.getScene().getWindow();
+        if (w instanceof Stage) ((Stage) w).close();
     }
 
-    private void renderPreview(String md) {
-        String html = mdRenderer.render(mdParser.parse(md == null ? "" : md));
-        wvPreview.getEngine().loadContent("<html><body style=\"font-family:system-ui; padding:12px;\">" + html + "</body></html>");
+    @FXML
+    private void onChooseCover() {
+        // keep simple: user can paste a URL / path in tfCover; actual file chooser logic can be added if needed
+        showAlert("未実装", "カバー選択は未実装です。URLを直接入力してください。");
     }
 
-    private void closeWindow() {
-        Stage s = (Stage) tfId.getScene().getWindow();
-        s.close();
+    private static String getText(ObjectNode n, String key) {
+        if (n == null || !n.has(key)) return "";
+        JsonNode node = n.get(key);
+        return node == null || node.isNull() ? "" : node.asText("");
     }
 
     private void showAlert(String title, String msg) {

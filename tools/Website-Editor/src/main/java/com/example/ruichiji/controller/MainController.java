@@ -32,10 +32,11 @@ public class MainController {
         }
 
         // kinds and tab titles
+        // NOTE: use keys that match the JSON filenames under assets/data (e.g. "movies" -> movies.json)
         String[][] specs = {
                 {"topics", "Topics"},
                 {"music", "Music"},
-                {"movie", "Movie"},
+                {"movies", "Movie"},        // ← changed from "movie" to "movies"
                 {"discography", "Discography"},
                 {"live", "Live"}
         };
@@ -47,7 +48,7 @@ public class MainController {
             try {
                 URL fxml = getClass().getResource("/fxml/ListView.fxml");
                 FXMLLoader loader = new FXMLLoader(fxml);
-                Parent content = loader.load(); // Parent にして型を固定しない
+                Parent content = loader.load();
                 ListController lc = loader.getController();
                 lc.setDataService(dataService);
                 lc.setKind(kind);
