@@ -94,7 +94,8 @@
     "description" : "",
     "duration" : "07:44",
     "credits" : [ "Music: Mizuhane", "Lyrics: Ruichiji", "Special Thanks: 松原やきうり、sayutta、ごま塩、7naci、的場 詩音、あんいち、Ryuno、wf" ],
-    "lyricsFile" : "data/lyrics/20250426-Remember_Unlimited_Memories.txt"
+    "lyricsFile" : "data/lyrics/20250426-Remember_Unlimited_Memories.txt",
+    "albums" : [ "[Rum Raisin Vol.24 あの日のパンフレット](https://machikanecat1211.wixsite.com/rumraisin/vol-24-%E3%81%82%E3%81%AE%E6%97%A5%E3%81%AE%E3%83%91%E3%83%B3%E3%83%95%E3%83%AC%E3%83%83%E3%83%88)" ]
   }, {
     "id" : "20250426-Yumenohate",
     "title" : "夢の果て",
@@ -102,7 +103,8 @@
     "description" : "",
     "duration" : "04:33",
     "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
-    "lyricsFile" : "data/lyrics/20250426-Yumenohate.txt"
+    "lyricsFile" : "data/lyrics/20250426-Yumenohate.txt",
+    "albums" : [ "[Rum Raisin Vol.24 あの日のパンフレット](https://machikanecat1211.wixsite.com/rumraisin/vol-24-%E3%81%82%E3%81%AE%E6%97%A5%E3%81%AE%E3%83%91%E3%83%B3%E3%83%95%E3%83%AC%E3%83%83%E3%83%88)" ]
   }, {
     "id" : "20250426-over_the_world",
     "title" : "Over The World",
@@ -110,7 +112,8 @@
     "description" : "",
     "duration" : "04:57",
     "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
-    "lyricsFile" : "data/lyrics/20250426-over_the_world.txt"
+    "lyricsFile" : "data/lyrics/20250426-over_the_world.txt",
+    "albums" : [ "[Rum Raisin Vol.24 あの日のパンフレット](https://machikanecat1211.wixsite.com/rumraisin/vol-24-%E3%81%82%E3%81%AE%E6%97%A5%E3%81%AE%E3%83%91%E3%83%B3%E3%83%95%E3%83%AC%E3%83%83%E3%83%88)" ]
   }, {
     "id" : "20241027-hoshizora",
     "title" : "星空の街",
