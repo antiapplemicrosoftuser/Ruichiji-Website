@@ -171,6 +171,40 @@ h1,h2,h3,h4,h5,h6 {
 /* card 内のレイアウトが崩れないように、img を左に寄せるルール（既存の inline style と併用されてもOK）*/
 #discography-list .card > div { align-items: center; }
 
+/* === 新規追加: Discography 個別ページ（アルバムページ）での大きなカバー表示 ===
+   個別アルバムページの <body> に data-album-id がセットされている前提で適用します。
+   ここでサイズを大きく設定し、モバイルでは適切に縮小します。 */
+body[data-album-id] .card img.thumb,
+body[data-album-id] .card .thumb {
+  width: 320px;   /* 個別ページでの大きい表示幅 */
+  height: 320px;  /* 個別ページでの大きい表示高さ */
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+  margin-bottom: 0.6rem;
+}
+
+/* 個別ページ内で横並びレイアウトの場合にサムネを左に寄せる補助 */
+body[data-album-id] .card > div { display: flex; gap: 1rem; align-items: flex-start; }
+
+/* 小さい画面ではサイズを小さくする */
+@media (max-width: 920px) {
+  body[data-album-id] .card img.thumb,
+  body[data-album-id] .card .thumb {
+    width: 240px;
+    height: 240px;
+  }
+}
+@media (max-width: 520px) {
+  body[data-album-id] .card img.thumb,
+  body[data-album-id] .card .thumb {
+    width: 100%;
+    height: auto;
+    max-height: 360px;
+    border-radius: 8px;
+  }
+}
+
 /* スマホでは画像をやや小さく */
 @media (max-width: 520px) {
   #home-list #latest-album .thumb,
@@ -324,11 +358,7 @@ ol.manual-number li {
   line-height: 1.5;
 }
 
-/* === 追加: 個別ページ（Topic / Music / Discography / Live）のタイトル上余白を小さくする ===
-   前提: 個別ページの <body> に data-topic-id / data-music-id / data-album-id / data-live-id の
-   いずれかがセットされていること（既存テンプレートにセットしてあれば限定適用されます）。
-   数値は好みで調整してください（0rem〜0.6rem 程度が自然）。
-*/
+/* === 個別ページタイトル上余白調整（安全なデフォルトも維持） === */
 body[data-topic-id] article.card > h2,
 body[data-music-id] article.card > h2,
 body[data-album-id] article.card > h2,
