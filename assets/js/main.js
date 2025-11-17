@@ -241,28 +241,33 @@ const main = (function () {
   function embedVideoHtml(url) {
     if (!url) return '';
     // YouTube
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      let id = null;
-      if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1].split(/[?&]/)[0];
-      if (url.includes('v=')) {
-        const q = url.split('?')[1] || '';
-        id = new URLSearchParams(q).get('v') || id;
+    try {
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let id = null;
+        if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1].split(/[?&]/)[0];
+        if (url.includes('v=')) {
+          const q = url.split('?')[1] || '';
+          id = new URLSearchParams(q).get('v') || id;
+        }
+        if (!id) return `<a href="${url}" target="_blank">${escapeHtml(url)}</a>`;
+        const embed = `https://www.youtube.com/embed/${id}`;
+        return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
+                  <iframe src="${embed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
+                  style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>`;
       }
-      if (!id) return `<a href="${url}" target="_blank">${escapeHtml(url)}</a>`;
-      const embed = `https://www.youtube.com/embed/${id}`;
-      return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe src="${embed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe></div>`;
+    } catch (e) {
+      console.debug('embedVideoHtml: youtube extraction failed', e, url);
     }
 
     // NicoNico - try to extract id and embed
-    // examples:
-    // https://www.nicovideo.jp/watch/sm12345678  -> sm12345678
-    // https://nico.ms/sm12345678                -> sm12345678
     try {
       const nicoMatch = url.match(/(?:nicovideo\.jp\/watch\/|nico\.ms\/)([a-z0-9]+(?:[0-9]*))/i);
       if (nicoMatch && nicoMatch[1]) {
         const nid = nicoMatch[1];
         const embed = `https://embed.nicovideo.jp/watch/${nid}`;
-        return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;"><iframe src="${embed}" frameborder="0" scrolling="no" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe></div>`;
+        return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
+                  <iframe src="${embed}" frameborder="0" scrolling="no" allowfullscreen
+                  style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>`;
       }
     } catch (e) {
       console.debug('embedVideoHtml: nico embed extraction failed', e, url);
@@ -364,20 +369,90 @@ const main = (function () {
   // ---- Music list / track page ----
   async function renderMusicList(containerSelector) {
     try {
-      const data = await fetchJSON('music');
-      const items = sortByDateDesc(data.items || data);
+      // Load music and discography concurrently
+      const [musicData, discographyData] = await Promise.all([
+        fetchJSON('music'),
+        fetchJSON('discography').catch(() => ({ items: [] }))
+      ]);
+
+      const items = sortByDateDesc(musicData.items || musicData);
+      const discItems = Array.isArray(discographyData.items) ? discographyData.items : (Array.isArray(discographyData) ? discographyData : []);
+
+      // Build mapping: musicId -> [albums]
+      const albumsByMusicId = new Map();
+      for (const album of discItems) {
+        if (!album || !Array.isArray(album.tracks)) continue;
+        for (const t of album.tracks) {
+          if (!t) continue;
+          let mid = null;
+          if (typeof t === 'string') mid = t;
+          else if (t.musicID) mid = t.musicID;
+          else if (t.id) mid = t.id;
+          else if (t.track) mid = t.track;
+          if (!mid) continue;
+          mid = String(mid);
+          const arr = albumsByMusicId.get(mid) || [];
+          arr.push(album);
+          albumsByMusicId.set(mid, arr);
+        }
+      }
+
       const container = document.querySelector(containerSelector);
       if (!container) return;
-      container.innerHTML = items.map(m => `
+
+      container.innerHTML = items.map(m => {
+        // Internal albums (from discography) that include this music id
+        const internalAlbums = albumsByMusicId.get(m.id) || [];
+
+        // Build HTML for internal albums (links to album.html?id=...)
+        let internalHtml = '';
+        if (internalAlbums.length > 0) {
+          const links = internalAlbums.map(a => {
+            const aid = a.id ? encodeURIComponent(a.id) : '';
+            const text = escapeHtml(a.title || a.id || '（無題のアルバム）');
+            const href = aid ? `album.html?id=${aid}` : 'discography.html';
+            return `<a href="${href}">${text}</a>`;
+          }).join(' ・ ');
+          internalHtml = `<div class="meta-small">収録アルバム: ${links}</div>`;
+        }
+
+        // External albums from music.json -> albums array
+        let externalHtml = '';
+        if (Array.isArray(m.albums) && m.albums.length > 0) {
+          const parts = m.albums.map(a => {
+            const s = String(a);
+            // markdown-style link [title](url)
+            const md = s.match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
+            if (md) {
+              const title = escapeHtml(md[1].trim());
+              const url = md[2].trim();
+              return `<a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>`;
+            }
+            return escapeHtml(s);
+          });
+          externalHtml = `<div class="meta-small">収録アルバム (外部): ${parts.join(' ・ ')}</div>`;
+        }
+
+        // existing UI (cover, title, meta, audio/note)
+        const coverHtml = `<img src="${thumbOrPlaceholder(m.cover,96,96)}" alt="" class="thumb">`;
+        const titleHref = `track.html?id=${encodeURIComponent(m.id)}`;
+        const dateAndDuration = `リリース: ${m.date || ''} ・ ${escapeHtml(m.duration || '')}`;
+
+        const audioOrNote = m.audio ? `<audio controls src="${m.audio}"></audio>` : `<p>${escapeHtml(m.note || '（再生無し）')}</p>`;
+
+        return `
         <div class="item">
-          <img src="${thumbOrPlaceholder(m.cover,96,96)}" alt="" class="thumb">
+          ${coverHtml}
           <div>
-            <div class="kicker"><a href="track.html?id=${m.id}">${escapeHtml(m.title)}</a></div>
-            <div class="meta-small">リリース: ${m.date || ''} ・ ${escapeHtml(m.duration||'')}</div>
-            <div>${m.audio ? `<audio controls src="${m.audio}"></audio>` : `<p>${escapeHtml(m.note||'（再生無し）')}</p>`}</div>
+            <div class="kicker"><a href="${titleHref}">${escapeHtml(m.title)}</a></div>
+            <div class="meta-small">${dateAndDuration}</div>
+            ${internalHtml}
+            ${externalHtml}
+            <div>${audioOrNote}</div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     } catch (e) { console.error('renderMusicList error', e); }
   }
 
@@ -435,7 +510,7 @@ const main = (function () {
           </section>
           <section>
             <h3>収録アルバム</h3>
-            <ul>${(item.albums||[]).map(aId=>`<li><a href="album.html?id=${aId}">${escapeHtml(aId)}</a></li>`).join('') || '<li>収録アルバムはありません。</li>'}</ul>
+            <ul>${(item.albums||[]).map(aId=>`<li><a href="album.html?id=${encodeURIComponent(aId)}">${escapeHtml(aId)}</a></li>`).join('') || '<li>収録アルバムはありません。</li>'}</ul>
           </section>
         </article>
       `;
@@ -564,7 +639,7 @@ const main = (function () {
           <div style="display:flex;gap:1rem;align-items:center;">
             <img src="${thumbOrPlaceholder(a.cover,140,140)}" alt="" class="thumb">
             <div>
-              <h3><a href="album.html?id=${a.id}">${escapeHtml(a.title)}</a></h3>
+              <h3><a href="album.html?id=${encodeURIComponent(a.id)}">${escapeHtml(a.title)}</a></h3>
               <div class="meta-small">参加アーティスト: ${escapeHtml((a.artists||[]).join(', ') || '未設定')}</div>
               <div class="meta-small">トラック数: ${a.tracks ? a.tracks.length : (a.track_count || '不明')}</div>
               <p>${escapeHtml(a.description || '')}</p>
@@ -593,7 +668,7 @@ const main = (function () {
         const trackRef = musicRefId ? (musicData.items||[]).find(m => m.id === musicRefId) : null;
         if (trackRef) {
           // 手動採番を残し、リンクは track.html?id=...
-          return `<li>${escapeHtml(t.track_no || '')}. <a href="track.html?id=${trackRef.id}">${escapeHtml(trackRef.title)}</a> — ${escapeHtml(trackRef.composer || trackRef.author || '')}</li>`;
+          return `<li>${escapeHtml(t.track_no || '')}. <a href="track.html?id=${encodeURIComponent(trackRef.id)}">${escapeHtml(trackRef.title)}</a> — ${escapeHtml(trackRef.composer || trackRef.author || '')}</li>`;
         } else {
           // 非連携曲では内部IDの表示をしない
           return `<li>${escapeHtml(t.track_no || '')}. ${escapeHtml(t.title)} — ${escapeHtml(t.author || '')}</li>`;
@@ -634,7 +709,7 @@ const main = (function () {
         <div class="item">
           <img src="${thumbOrPlaceholder(l.image,96,96)}" alt="" class="thumb">
           <div>
-            <div class="kicker"><a href="live-event.html?id=${l.id}">${escapeHtml(l.title)}</a></div>
+            <div class="kicker"><a href="live-event.html?id=${encodeURIComponent(l.id)}">${escapeHtml(l.title)}</a></div>
             <div class="meta-small">${l.date || ''} ・ ${escapeHtml(l.venue||'')}</div>
             <div>${escapeHtml(truncate(l.note||'',140))}</div>
           </div>
@@ -657,7 +732,7 @@ const main = (function () {
       const setlistHtml = (item.setlist || []).map((s, idx) => {
         const found = (musicData.items||[]).find(m => m.id === s.id || m.title === s.title);
         if (found) {
-          return `<li>${idx+1}. <a href="track.html?id=${found.id}">${escapeHtml(found.title)}</a></li>`;
+          return `<li>${idx+1}. <a href="track.html?id=${encodeURIComponent(found.id)}">${escapeHtml(found.title)}</a></li>`;
         } else {
           return `<li>${idx+1}. ${escapeHtml(s.title || s)}</li>`;
         }
