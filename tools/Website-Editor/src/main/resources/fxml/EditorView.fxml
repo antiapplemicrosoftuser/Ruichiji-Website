@@ -13,18 +13,91 @@
     <Label text="Date:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
     <TextField fx:id="tfDate" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-    <Label text="Cover:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-    <HBox spacing="6" GridPane.rowIndex="3" GridPane.columnIndex="1">
+    <Label fx:id="lblCover" text="Cover:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+    <HBox fx:id="coverBox" spacing="6" GridPane.rowIndex="3" GridPane.columnIndex="1">
       <TextField fx:id="tfCover" HBox.hgrow="ALWAYS"/>
       <Button text="Choose" onAction="#onChooseCover"/>
     </HBox>
 
-    <!-- Changed: give this label an fx:id so controller can change it to "Content" for topics -->
+    <!-- Description / Content / Note label -->
     <Label fx:id="lblDescription" text="Description:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
     <TextArea fx:id="taDescription" GridPane.rowIndex="4" GridPane.columnIndex="1" prefRowCount="3"/>
   </GridPane>
 
-  <SplitPane orientation="HORIZONTAL" prefHeight="360">
+  <!-- Music-specific fields -->
+  <VBox fx:id="musicBox" spacing="6">
+    <GridPane hgap="8" vgap="8">
+      <Label text="Duration:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+      <TextField fx:id="tfDuration" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+      <Label text="Credits (comma-separated):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+      <TextField fx:id="tfCredits" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+      <Label text="Albums (comma-separated):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+      <TextField fx:id="tfAlbums" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+      <Label text="Audio file:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+      <HBox spacing="6" GridPane.rowIndex="3" GridPane.columnIndex="1">
+        <TextField fx:id="tfAudioFile" HBox.hgrow="ALWAYS"/>
+        <Button text="Choose" onAction="#onChooseAudio"/>
+      </HBox>
+    </GridPane>
+  </VBox>
+
+  <!-- Movies-specific fields -->
+  <VBox fx:id="movieBox" spacing="6">
+    <GridPane hgap="8" vgap="8">
+      <Label text="Service:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+      <TextField fx:id="tfService" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+      <Label text="Uploader:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+      <TextField fx:id="tfUploader" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+      <Label text="Video URL:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+      <TextField fx:id="tfVideo" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+      <Label text="Music ID:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+      <TextField fx:id="tfMusicID" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+    </GridPane>
+  </VBox>
+
+  <!-- Discography-specific fields -->
+  <VBox fx:id="discographyBox" spacing="6">
+    <GridPane hgap="8" vgap="8">
+      <Label text="Artists (comma-separated):" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+      <TextField fx:id="tfArtists" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+      <Label text="Tracks:" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.valignment="TOP"/>
+      <VBox spacing="4" GridPane.rowIndex="1" GridPane.columnIndex="1">
+        <ListView fx:id="lvTracks" prefHeight="150"/>
+        <HBox spacing="6">
+          <Button text="Add Track" onAction="#onAddTrack"/>
+          <Button text="Edit Track" onAction="#onEditTrack"/>
+          <Button text="Remove Track" onAction="#onRemoveTrack"/>
+        </HBox>
+      </VBox>
+    </GridPane>
+  </VBox>
+
+  <!-- Live-specific fields -->
+  <VBox fx:id="liveBox" spacing="6">
+    <GridPane hgap="8" vgap="8">
+      <Label text="Venue:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+      <TextField fx:id="tfVenue" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+      <Label text="Setlist:" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.valignment="TOP"/>
+      <VBox spacing="4" GridPane.rowIndex="1" GridPane.columnIndex="1">
+        <ListView fx:id="lvSetlist" prefHeight="150"/>
+        <HBox spacing="6">
+          <Button text="Add Item" onAction="#onAddSetlist"/>
+          <Button text="Edit Item" onAction="#onEditSetlist"/>
+          <Button text="Remove Item" onAction="#onRemoveSetlist"/>
+        </HBox>
+      </VBox>
+    </GridPane>
+  </VBox>
+
+  <!-- Lyrics / Preview split; visibility controlled by controller -->
+  <SplitPane fx:id="splitPane" orientation="HORIZONTAL" prefHeight="360">
     <VBox spacing="6" prefWidth="400" style="-fx-padding:6;">
       <Label text="Lyrics (Markdown)"/>
       <TextArea fx:id="taLyrics" wrapText="true" VBox.vgrow="ALWAYS"/>

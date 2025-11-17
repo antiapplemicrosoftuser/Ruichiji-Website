@@ -42,19 +42,13 @@ public class DataService {
 
         Path foundAssetsData = findAssetsDataUpwards(execRoot);
         if (foundAssetsData != null) {
-            // compute values into local variables to avoid assigning final fields multiple times
-            Path dataDirCandidate = foundAssetsData.toAbsolutePath(); // .../assets/data
-            Path assetsDir = dataDirCandidate.getParent(); // .../assets
+            this.dataDir = foundAssetsData.toAbsolutePath();
+            Path assetsDir = dataDir.getParent(); // .../assets
             Path repoRootCandidate = assetsDir != null && assetsDir.getParent() != null
-                    ? assetsDir.getParent().toAbsolutePath() // parent of assets -> repo root
+                    ? assetsDir.getParent().toAbsolutePath()
                     : assetsDir != null ? assetsDir.toAbsolutePath() : execRoot;
-
-            Path imagesDirCandidate = repoRootCandidate.resolve("assets").resolve("images");
-
-            // Now assign final fields exactly once
             this.repoRoot = repoRootCandidate;
-            this.dataDir = dataDirCandidate;
-            this.imagesDir = imagesDirCandidate;
+            this.imagesDir = repoRoot.resolve("assets").resolve("images");
         } else {
             // fallback: use local data and images under execRoot
             this.repoRoot = execRoot;
@@ -208,6 +202,41 @@ public class DataService {
         } catch (Exception ex) {
             return dest;
         }
+    }
+
+    /**
+     * Save lyrics text into assets/data/lyrics/<musicId>.txt (UTF-8).
+     * Returns the path string relative to repository root (slashes '/'), e.g. "data/lyrics/20250825-try_again.txt".
+     */
+    public String saveLyricsFile(String musicId, String lyrics) throws IOException {
+        if (musicId == null || musicId.isBlank()) throw new IllegalArgumentException("musicId is required");
+        Path lyricsDir = dataDir.resolve("lyrics");
+        Files.createDirectories(lyricsDir);
+        String fileName = musicId + ".txt";
+        Path file = lyricsDir.resolve(fileName);
+        Files.writeString(file, lyrics == null ? "" : lyrics, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Path baseForRel = (repoRoot != null) ? repoRoot : execRoot;
+        Path rel;
+        try {
+            rel = baseForRel.relativize(file);
+        } catch (Exception ex) {
+            rel = file;
+        }
+        String relStr = rel.toString().replace('\\', '/');
+        return relStr;
+    }
+
+    /**
+     * Read lyrics text given the path stored in JSON (relative to repo root), e.g. "data/lyrics/ID.txt".
+     * Returns null if file not found.
+     */
+    public String readLyricsFile(String lyricsFilePath) throws IOException {
+        if (lyricsFilePath == null || lyricsFilePath.isBlank()) return null;
+        Path baseForRel = (repoRoot != null) ? repoRoot : execRoot;
+        Path file = baseForRel.resolve(lyricsFilePath).normalize();
+        if (!Files.exists(file)) return null;
+        String s = Files.readString(file, StandardCharsets.UTF_8);
+        return s;
     }
 
     // Expose for debugging
