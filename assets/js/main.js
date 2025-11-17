@@ -283,22 +283,28 @@ const main = (function () {
       if (!latest || !container) return;
       let html = '';
       if (kind === 'topics') {
-        html = `<div class="kicker">${escapeHtml(latest.title)}</div>
+        // Title links to the topic individual page, and link text changed to Topic一覧へ (link to topics list page)
+        const titleHref = `topic.html?id=${encodeURIComponent(latest.id)}`;
+        html = `<div class="kicker"><a href="${titleHref}">${escapeHtml(latest.title)}</a></div>
                 <div class="meta-small">${latest.date || ''}</div>
                 <p>${escapeHtml(truncate(latest.content || '', 140))}</p>
-                <a href="${linkPrefix + latest.id}">続きを読む</a>`;
+                <a href="topics.html">Topic一覧へ</a>`;
       } else if (kind === 'music') {
-        html = `<div class="kicker">${escapeHtml(latest.title)}</div>
+        // Title links to the music individual page, and link text changed to Music一覧へ (link to music list page)
+        const titleHref = (linkPrefix ? linkPrefix : 'track.html?id=') + encodeURIComponent(latest.id);
+        html = `<div class="kicker"><a href="${titleHref}">${escapeHtml(latest.title)}</a></div>
                 <div class="meta-small">リリース: ${latest.date || ''}</div>
                 ${latest.audio ? `<audio controls src="${latest.audio}"></audio>` : `<p>${escapeHtml(truncate(latest.note||'',120))}</p>`}
-                <p><a href="${linkPrefix + latest.id}">曲のページへ</a></p>`;
+                <p><a href="music.html">Music一覧へ</a></p>`;
       } else if (kind === 'movies') {
-        html = `<div class="kicker">${escapeHtml(latest.title)}</div>
+        // Title links to the video url if available, otherwise to movie page
+        const titleHref = latest.video || latest.url || `movie.html?id=${encodeURIComponent(latest.id)}`;
+        const titleLink = `<a href="${titleHref}" target="_blank" rel="noopener">${escapeHtml(latest.title)}</a>`;
+        html = `<div class="kicker">${titleLink}</div>
                 <div class="meta-small">公開: ${latest.date || ''}</div>
                 ${latest.video ? embedVideoHtml(latest.video) : `<p>${escapeHtml(truncate(latest.description||'',120))}</p>`}
                 <p><a href="movie.html">動画一覧へ</a></p>`;
       } else if (kind === 'discography') {
-        // image + link grouped on left, details on right
         html = `
           <div style="float:left;margin-right:12px;text-align:center;">
             <img src="${thumbOrPlaceholder(latest.cover,120,120)}" alt="" class="thumb" style="display:block;margin-bottom:8px">
