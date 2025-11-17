@@ -1,22 +1,139 @@
 {
-  "items": [
-    {
-      "id": "20250825-try_again",
-      "date": "2025-08-25",
-      "title": "Try Again! (a cappella)",
-      "duration": "4:25",
-      "credits": ["Music: Ruichiji", "Lyrics: Ruichiji"],
-      "lyricsFile": "data/lyrics/20250825-try_again.txt",
-      "albums": []
-    },
-    {
-      "id": "20250222-that_day_sky",
-      "date": "2025-02-22",
-      "title": "あの日の空 (a cappella)",
-      "duration": "5:06",
-      "credits": ["Music: Ruichiji", "Lyrics: Ruichiji"],
-      "lyricsFile": "data/lyrics/20250222-that_day_sky.txt",
-      "albums": []
-    }
-  ]
+  "items" : [ {
+    "id" : "20251026-hamo_reason",
+    "title" : "HAMO Reason",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "05:06",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-hamo_reason.txt"
+  }, {
+    "id" : "20251026-love_song",
+    "title" : "ラブソングを聴かせて",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "05:06",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-love_song.txt"
+  }, {
+    "id" : "20251026-save_you",
+    "title" : "Save you",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "04:18",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-save_you.txt"
+  }, {
+    "id" : "20251026-last_night",
+    "title" : "Last Night",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "05:12",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-last_night.txt"
+  }, {
+    "id" : "20251026-one_more",
+    "title" : "もう一度",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "04:35",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-one_more.txt"
+  }, {
+    "id" : "20251026-never_be",
+    "title" : "NEVER BE",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "04:33",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-never_be.txt"
+  }, {
+    "id" : "20251026-panic_magic",
+    "title" : "Panic Magic!",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "04:28",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-panic_magic.txt"
+  }, {
+    "id" : "20251026-mysterious_wander",
+    "title" : "Mysterious Wander",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "04:09",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-mysterious_wander.txt"
+  }, {
+    "id" : "20251026-miracle_moments",
+    "title" : "Miracle Moments",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "04:22",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-miracle_moments.txt"
+  }, {
+    "id" : "20251026-itsuwari",
+    "title" : "偽り",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "04:44",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-itsuwari.txt"
+  }, {
+    "id" : "20251026-wind",
+    "title" : "WIND",
+    "date" : "2025-10-26",
+    "description" : "",
+    "duration" : "04:25",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251026-wind.txt"
+  }, {
+    "id" : "20250426-Remember_Unlimited_Memories",
+    "title" : "Remember Unlimited Memories",
+    "date" : "2025-04-26",
+    "description" : "",
+    "duration" : "07:44",
+    "credits" : [ "Music: Mizuhane", "Lyrics: Ruichiji", "Special Thanks: 松原やきうり、sayutta、ごま塩、7naci、的場 詩音、あんいち、Ryuno、wf" ],
+    "lyricsFile" : "assets/data/lyrics/20250426-Remember_Unlimited_Memories.txt"
+  }, {
+    "id" : "20250426-Yumenohate",
+    "title" : "夢の果て",
+    "date" : "2025-04-26",
+    "description" : "",
+    "duration" : "04:33",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20250426-Yumenohate.txt"
+  }, {
+    "id" : "20250426-over_the_world",
+    "title" : "Over The World",
+    "date" : "2025-04-26",
+    "description" : "",
+    "duration" : "04:57",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20250426-over_the_world.txt"
+  }, {
+    "id" : "20241027-hoshizora",
+    "title" : "星空の街",
+    "date" : "2024-10-27",
+    "description" : "",
+    "duration" : "05:22",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "assets/data/lyrics/20251027-hoshizora.txt"
+  }, {
+    "id" : "20250825-try_again",
+    "date" : "2025-08-25",
+    "title" : "Try Again! (a cappella)",
+    "duration" : "4:25",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "data/lyrics/20250825-try_again.txt",
+    "albums" : [ ]
+  }, {
+    "id" : "20250222-that_day_sky",
+    "date" : "2025-02-22",
+    "title" : "あの日の空 (a cappella)",
+    "duration" : "5:06",
+    "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
+    "lyricsFile" : "data/lyrics/20250222-that_day_sky.txt",
+    "albums" : [ ]
+  } ]
 }

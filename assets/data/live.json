@@ -1,29 +1,29 @@
 {
-  "items": [
-    {
-      "id": "l2025-10-one-man",
-      "title": "ワンマンライブ 2025",
-      "date": "2025-10-05 19:00",
-      "venue": "東京・STUDIO HALL",
-      "image": "https://via.placeholder.com/1200x400?text=Live+2025",
-      "note": "スペシャルゲストを迎えたワンマンライブ。写真とセットリストを公開しています。",
-      "setlist": [
-        { "title": "星の航海", "id": "m001-hoshinokoukai" },
-        { "title": "Ambient Sky", "id": "m002-ambient-sky" },
-        { "title": "アンコール" }
-      ]
-    },
-    {
-      "id": "l2024-mini",
-      "title": "ミニライブ 2024",
-      "date": "2024-12-12 18:30",
-      "venue": "大阪・Live House",
-      "image": "https://via.placeholder.com/1200x400?text=Mini+Live+2024",
-      "note": "アコースティック編成でのミニライブ。",
-      "setlist": [
-        { "title": "Night Tide" },
-        { "title": "Ambient Sky", "id": "m002-ambient-sky" }
-      ]
-    }
-  ]
+  "items" : [ {
+    "id" : "20250227-kaze_1st_live",
+    "title" : "風邪の時に見る夢 1st Live",
+    "date" : "2025-02-27",
+    "note" : "",
+    "setlist" : [ {
+      "title" : "SPACE SLIDER (another version)"
+    }, {
+      "title" : "星空の街",
+      "id" : "20241027-hoshizora"
+    }, {
+      "title" : "Over the World",
+      "id" : "20250426-over_the_world"
+    }, {
+      "title" : "ベジータの楽しいビンゴ (Cover)"
+    }, {
+      "title" : "B-Dash (Cover)"
+    }, {
+      "title" : "[Medley] LIVE NOW (この木なんの木～守ってあげたい～Be My Baby～愛の歌)"
+    }, {
+      "title" : "あの日の空 (a cappella)",
+      "id" : "20250222-that_day_sky"
+    }, {
+      "title" : "Remember Unlimited Memories",
+      "id" : "20250426-Remember_Unlimited_Memories"
+    } ]
+  } ]
 }
