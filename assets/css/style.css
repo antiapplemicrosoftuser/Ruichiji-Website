@@ -363,7 +363,7 @@ body[data-topic-id] article.card > h2,
 body[data-music-id] article.card > h2,
 body[data-album-id] article.card > h2,
 body[data-live-id] article.card > h2 {
-  margin-top: 0.4rem;
+  margin-top: 0.2rem;
   padding-top: 0;
 }
 
