@@ -223,6 +223,13 @@ public class DataService {
             rel = file;
         }
         String relStr = rel.toString().replace('\\', '/');
+        
+        // Remove 'assets/' prefix from path for website compatibility
+        // The website expects paths like 'data/lyrics/...' instead of 'assets/data/lyrics/...'
+        if (relStr.startsWith("assets/")) {
+            relStr = relStr.substring("assets/".length());
+        }
+        
         return relStr;
     }
 

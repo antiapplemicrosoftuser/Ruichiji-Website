@@ -408,7 +408,7 @@ public class EditorController {
                             showAlert("保存エラー", "楽曲ID が空です。歌詞をファイル保存するには ID を入力してください。");
                             return;
                         }
-                        // save file under assets/data/lyrics/<id>.txt, get relative path
+                        // save file under assets/data/lyrics/<id>.txt, get relative path (without 'assets/' prefix)
                         String relPath = dataService.saveLyricsFile(idForFile, lyricsTxt);
                         node.put("lyricsFile", relPath);
                         // remove inline lyrics field if present
