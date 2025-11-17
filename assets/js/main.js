@@ -462,8 +462,10 @@ const main = (function () {
       const container = document.querySelector(containerSelector);
       if (!container) return;
       if (!id) { container.innerHTML = '<p>idが指定されていません。</p>'; return; }
-      const data = await fetchJSON('music');
-      const items = data.items || data;
+
+      // Load music item and discography (discography used for finding internal albums)
+      const [musicData] = await Promise.all([fetchJSON('music')]);
+      const items = musicData.items || musicData;
       const item = items.find(x => x.id === id);
       if (!item) { container.innerHTML = '<p>曲が見つかりません。</p>'; return; }
 
@@ -489,7 +491,50 @@ const main = (function () {
         return `<li><a href="${anchor}">${escapeHtml(mv.title)}</a>（${escapeHtml(mv.date||'')}）</li>`;
       }).join('');
 
-      // render page with lyrics and MV links
+      // Load discography to find internal albums that include this track
+      const discographyData = await fetchJSON('discography').catch(() => ({ items: [] }));
+      const discItems = Array.isArray(discographyData.items) ? discographyData.items : (Array.isArray(discographyData) ? discographyData : []);
+
+      const albumsForThisTrack = discItems.filter(album => {
+        if (!album || !Array.isArray(album.tracks)) return false;
+        return album.tracks.some(t => {
+          if (!t) return false;
+          if (typeof t === 'string') return t === item.id;
+          if (t.musicID && t.musicID === item.id) return true;
+          if (t.id && t.id === item.id) return true;
+          if (t.track && t.track === item.id) return true;
+          return false;
+        });
+      });
+
+      let internalAlbumsHtml = '';
+      if (albumsForThisTrack.length > 0) {
+        const links = albumsForThisTrack.map(a => {
+          const aid = a.id ? encodeURIComponent(a.id) : '';
+          const text = escapeHtml(a.title || a.id || '（無題のアルバム）');
+          const href = aid ? `album.html?id=${aid}` : 'discography.html';
+          return `<a href="${href}">${text}</a>`;
+        }).join(' ・ ');
+        internalAlbumsHtml = `<section><h3>収録アルバム</h3><div class="meta-small">${links}</div></section>`;
+      }
+
+      // External albums from item.albums
+      let externalAlbumsHtml = '';
+      if (Array.isArray(item.albums) && item.albums.length > 0) {
+        const parts = item.albums.map(a => {
+          const s = String(a);
+          const md = s.match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
+          if (md) {
+            const title = escapeHtml(md[1].trim());
+            const url = md[2].trim();
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>`;
+          }
+          return escapeHtml(s);
+        });
+        externalAlbumsHtml = `<section><h3>収録アルバム (外部)</h3><div class="meta-small">${parts.join(' ・ ')}</div></section>`;
+      }
+
+      // render page with lyrics, MV links, and album sections
       container.innerHTML = `
         <article class="card">
           <h2 id="track-${escapeHtml(item.id)}">${escapeHtml(item.title)}</h2>
@@ -504,14 +549,15 @@ const main = (function () {
             <h3>Credits</h3>
             <p class="meta-small">${escapeHtml((item.credits||[]).join(', ') || '未設定')}</p>
           </section>
+
           <section>
             <h3>Lyrics</h3>
             <div class="content" id="lyrics-content">${nl2br(escapeHtml(lyricsText || '歌詞は未設定です。'))}</div>
           </section>
-          <section>
-            <h3>収録アルバム</h3>
-            <ul>${(item.albums||[]).map(aId=>`<li><a href="album.html?id=${encodeURIComponent(aId)}">${escapeHtml(aId)}</a></li>`).join('') || '<li>収録アルバムはありません。</li>'}</ul>
-          </section>
+
+          ${internalAlbumsHtml}
+          ${externalAlbumsHtml || ''}
+
         </article>
       `;
     } catch (e) { console.error('renderTrackPage error', e); }
