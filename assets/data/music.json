@@ -118,7 +118,8 @@
     "description" : "",
     "duration" : "05:22",
     "credits" : [ "Music: Ruichiji", "Lyrics: Ruichiji" ],
-    "lyricsFile" : "assets/data/lyrics/20251027-hoshizora.txt"
+    "lyricsFile" : "assets/data/lyrics/20241027-hoshizora.txt",
+    "albums" : [ "[Rum Raisin Vol.23​mendacium](https://machikanecat.bandcamp.com/)" ]
   }, {
     "id" : "20250825-try_again",
     "date" : "2025-08-25",

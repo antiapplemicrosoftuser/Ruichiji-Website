@@ -323,3 +323,26 @@ ol.manual-number li {
   margin: 0.25rem 0;
   line-height: 1.5;
 }
+
+/* === 追加: 個別ページ（Topic / Music / Discography / Live）のタイトル上余白を小さくする ===
+   前提: 個別ページの <body> に data-topic-id / data-music-id / data-album-id / data-live-id の
+   いずれかがセットされていること（既存テンプレートにセットしてあれば限定適用されます）。
+   数値は好みで調整してください（0rem〜0.6rem 程度が自然）。
+*/
+body[data-topic-id] article.card > h2,
+body[data-music-id] article.card > h2,
+body[data-album-id] article.card > h2,
+body[data-live-id] article.card > h2 {
+  margin-top: 0.4rem;
+  padding-top: 0;
+}
+
+/* フォールバック（テンプレートに data- 属性がない場合、全カード見出しの余白を小さくする） */
+article.card > h2,
+.card > h2 {
+  margin-top: 0.4rem;
+  padding-top: 0;
+}
+
+/* 必要なら強制的に適用するオプション（コメント外して使用） */
+/* article.card > h2 { margin-top: 0.4rem !important; padding-top: 0 !important; } */
