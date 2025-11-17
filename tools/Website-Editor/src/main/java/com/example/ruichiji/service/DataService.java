@@ -207,6 +207,11 @@ public class DataService {
     /**
      * Save lyrics text into assets/data/lyrics/<musicId>.txt (UTF-8).
      * Returns the path string relative to repository root (slashes '/'), e.g. "data/lyrics/20250825-try_again.txt".
+     *
+     * Note: the file is written under assets/data/lyrics on disk, but the website expects
+     * the JSON to reference "data/lyrics/..." (without the leading 'assets/'). To keep the
+     * on-disk layout unchanged while producing JSON the site expects, this method strips
+     * a leading "assets/" from the returned relative path when present.
      */
     public String saveLyricsFile(String musicId, String lyrics) throws IOException {
         if (musicId == null || musicId.isBlank()) throw new IllegalArgumentException("musicId is required");
@@ -223,20 +228,36 @@ public class DataService {
             rel = file;
         }
         String relStr = rel.toString().replace('\\', '/');
+        // Remove leading 'assets/' so JSON contains 'data/lyrics/...' which the website expects.
+        relStr = relStr.replaceFirst("^assets/", "");
         return relStr;
     }
 
     /**
      * Read lyrics text given the path stored in JSON (relative to repo root), e.g. "data/lyrics/ID.txt".
      * Returns null if file not found.
+     *
+     * This method attempts to resolve paths stored in JSON as "data/lyrics/..." by checking both:
+     *  - repoRoot.resolve(lyricsFilePath)
+     *  - repoRoot.resolve("assets").resolve(lyricsFilePath)
+     * This allows JSON to contain "data/lyrics/..." while the actual file resides under assets/data/lyrics.
      */
     public String readLyricsFile(String lyricsFilePath) throws IOException {
         if (lyricsFilePath == null || lyricsFilePath.isBlank()) return null;
         Path baseForRel = (repoRoot != null) ? repoRoot : execRoot;
         Path file = baseForRel.resolve(lyricsFilePath).normalize();
-        if (!Files.exists(file)) return null;
-        String s = Files.readString(file, StandardCharsets.UTF_8);
-        return s;
+        if (Files.exists(file)) {
+            String s = Files.readString(file, StandardCharsets.UTF_8);
+            return s;
+        }
+        // If the JSON path is "data/lyrics/..." but actual files are stored under assets/data/lyrics,
+        // try resolving under assets/ as a fallback.
+        Path assetsCandidate = baseForRel.resolve("assets").resolve(lyricsFilePath).normalize();
+        if (Files.exists(assetsCandidate)) {
+            String s = Files.readString(assetsCandidate, StandardCharsets.UTF_8);
+            return s;
+        }
+        return null;
     }
 
     // Expose for debugging

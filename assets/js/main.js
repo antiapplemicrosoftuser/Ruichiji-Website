@@ -692,20 +692,20 @@ const main = (function () {
         if (musicRefId) {
           const trackRef = (musicData.items || []).find(m => m.id === musicRefId || (m.id && String(m.id).toLowerCase() === String(musicRefId).toLowerCase()));
           if (trackRef) {
-            // IMPORTANT: prefer album-provided 'auther' (note: 'auther' spelled in data).
-            // If auther is not provided, do NOT fall back to other credit fields — show nothing.
+            // IMPORTANT: prefer album-provided 'author' on the track entry.
+            // If author is not provided, do NOT fall back to other credit fields — show nothing.
             let composerText = '';
-            if (t && typeof t === 'object' && t.auther) {
-              composerText = t.auther;
+            if (t && typeof t === 'object' && t.author) {
+              composerText = t.author;
             }
 
             return `<li>${escapeHtml(trackNo)}. <a href="track.html?id=${encodeURIComponent(trackRef.id)}">${escapeHtml(trackRef.title)}</a>${composerText ? ' — ' + escapeHtml(composerText) : ''}</li>`;
           }
         }
 
-        // fallback: show provided title and prefer 'auther' field on album track entries only
+        // fallback: show provided title and prefer 'author' field on album track entries only
         const titleText = (typeof t === 'object' && t.title) ? t.title : ((typeof t === 'string') ? '' : '');
-        const authorText = (typeof t === 'object' && t.auther) ? t.auther : '';
+        const authorText = (typeof t === 'object' && t.author) ? t.author : '';
         return `<li>${escapeHtml(trackNo)}. ${escapeHtml(titleText)}${authorText ? ' — ' + escapeHtml(authorText) : ''}</li>`;
       }).join('');
 
