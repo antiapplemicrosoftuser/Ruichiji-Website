@@ -205,6 +205,38 @@ body[data-album-id] .card > div { display: flex; gap: 1rem; align-items: flex-st
   }
 }
 
+/* === album-page 用: 個別アルバムページのカバーを大きく表示（.album-page クラス対応） === */
+.album-page .card img.thumb,
+.album-page .card .thumb {
+  width: 320px;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+  margin-bottom: 0.6rem;
+}
+
+/* Album page レイアウト補助（横並びにする等） */
+.album-page .card > div { display: flex; gap: 1rem; align-items: flex-start; }
+
+/* レスポンシブ */
+@media (max-width: 920px) {
+  .album-page .card img.thumb,
+  .album-page .card .thumb {
+    width: 240px;
+    height: 240px;
+  }
+}
+@media (max-width: 520px) {
+  .album-page .card img.thumb,
+  .album-page .card .thumb {
+    width: 100%;
+    height: auto;
+    max-height: 360px;
+    border-radius: 8px;
+  }
+}
+
 /* スマホでは画像をやや小さく */
 @media (max-width: 520px) {
   #home-list #latest-album .thumb,
@@ -363,7 +395,7 @@ body[data-topic-id] article.card > h2,
 body[data-music-id] article.card > h2,
 body[data-album-id] article.card > h2,
 body[data-live-id] article.card > h2 {
-  margin-top: 0.2rem;
+  margin-top: 0.4rem;
   padding-top: 0;
 }
 
