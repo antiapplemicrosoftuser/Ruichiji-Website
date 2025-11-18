@@ -243,7 +243,10 @@ const main = (function () {
       // focus first focusable element inside nav (or the nav itself)
       const focusables = getFocusableInNav();
       if (focusables.length) focusables[0].focus();
-      else nav.setAttribute('tabindex', '-1'), nav.focus();
+      else {
+        nav.setAttribute('tabindex', '-1');
+        nav.focus();
+      }
 
       // ESC handler to close
       escHandler = function (ev) {
@@ -306,13 +309,12 @@ const main = (function () {
     nav.addEventListener('click', function (e) {
       const a = e.target.closest('a[href]');
       if (!a) return;
-      // if it's an anchor to same page hash, let internal handler do scroll; still close nav for mobile
+      // close the nav after navigation
       closeNav();
     });
 
     // ensure keyboard activation (space/enter handled by default for button)
     // Make sure nav is marked hidden by default on mobile-capable devices
-    // We keep ARIA attributes consistent:
     if (!nav.hasAttribute('aria-hidden')) nav.setAttribute('aria-hidden', 'true');
   }
   // === end hamburger ===
@@ -392,7 +394,6 @@ const main = (function () {
 
   function thumbOrPlaceholder(url, w = 200, h = 200) {
     // If a URL is provided, use it; otherwise use the repository default cover image.
-    // This keeps behavior simple and ensures a consistent fallback across the site.
     if (url) return url;
     return DEFAULT_COVER_PATH;
   }
@@ -428,7 +429,6 @@ const main = (function () {
     return null;
   }
 
-  // Strict ID-only finder (exact or case-insensitive) - for musicID matching
   function findMusicById(musicItems = [], ref) {
     if (!ref) return null;
     const r = String(ref).trim();
@@ -439,16 +439,13 @@ const main = (function () {
     return null;
   }
 
-  // Find movies that reference a given music id (support musicID/musicIDs/tracks[].musicID and legacy fields)
   function findMoviesByMusicId(movieItems = [], musicId) {
     if (!musicId) return [];
     const r = String(musicId).trim();
     const list = (movieItems || []).filter(m => {
-      // new fields
       if (m.musicID && String(m.musicID).trim().toLowerCase() === r.toLowerCase()) return true;
       if (Array.isArray(m.musicIDs) && m.musicIDs.some(x => String(x).trim().toLowerCase() === r.toLowerCase())) return true;
       if (Array.isArray(m.tracks) && m.tracks.some(t => t && t.musicID && String(t.musicID).trim().toLowerCase() === r.toLowerCase())) return true;
-      // legacy fields: track, track_id, tracks[].id
       if (m.track && String(m.track).trim().toLowerCase() === r.toLowerCase()) return true;
       if (m.track_id && String(m.track_id).trim().toLowerCase() === r.toLowerCase()) return true;
       if (Array.isArray(m.tracks) && m.tracks.some(t => t && (String(t.id||'').trim().toLowerCase() === r.toLowerCase()))) return true;
@@ -459,7 +456,6 @@ const main = (function () {
 
   function embedVideoHtml(url) {
     if (!url) return '';
-    // YouTube
     try {
       if (url.includes('youtube.com') || url.includes('youtu.be')) {
         let id = null;
@@ -476,7 +472,6 @@ const main = (function () {
       console.debug('embedVideoHtml: youtube extraction failed', e, url);
     }
 
-    // NicoNico - try to extract id and embed
     try {
       const nicoMatch = url.match(/(?:nicovideo\.jp\/watch\/|nico\.ms\/)([a-z0-9]+(?:[0-9]*))/i);
       if (nicoMatch && nicoMatch[1]) {
@@ -488,7 +483,6 @@ const main = (function () {
       console.debug('embedVideoHtml: nico embed extraction failed', e, url);
     }
 
-    // Fallback: plain link
     return `<p><a href="${url}" target="_blank" rel="noopener">${escapeHtml(url)}</a></p>`;
   }
 
@@ -502,21 +496,18 @@ const main = (function () {
       if (!latest || !container) return;
       let html = '';
       if (kind === 'topics') {
-        // Title links to the topic individual page, and link text changed to Topic一覧へ (link to topics list page)
         const titleHref = `topic.html?id=${encodeURIComponent(latest.id)}`;
         html = `<h2 class="kicker"><a href="${titleHref}">${escapeHtml(latest.title)}</a></h2>
                 <div class="meta-small">${latest.date || ''}</div>
                 <p class="preview">${escapeHtml(truncate(latest.content || '', 140))}</p>
                 <p><a class="more" href="topics.html">Topic一覧へ</a></p>`;
       } else if (kind === 'music') {
-        // Title links to the music individual page, and link text changed to Music一覧へ (link to music list page)
         const titleHref = (linkPrefix ? linkPrefix : 'track.html?id=') + encodeURIComponent(latest.id);
         html = `<h2 class="kicker"><a href="${titleHref}">${escapeHtml(latest.title)}</a></h2>
                 <div class="meta-small">リリース: ${latest.date || ''}</div>
                 ${latest.audio ? `<audio controls src="${latest.audio}"></audio>` : `<p class="preview">${escapeHtml(truncate(latest.note||'',120))}</p>`}
                 <p><a class="more" href="music.html">Music一覧へ</a></p>`;
       } else if (kind === 'movies') {
-        // Title links to the video url if available, otherwise to movie page
         const titleHref = latest.video || latest.url || `movie.html?id=${encodeURIComponent(latest.id)}`;
         const titleLink = `<a href="${titleHref}" target="_blank" rel="noopener">${escapeHtml(latest.title)}</a>`;
         html = `<h2 class="kicker">${titleLink}</h2>
@@ -536,7 +527,6 @@ const main = (function () {
           </div>
           <div style="clear:both"></div>`;
       } else if (kind === 'live') {
-        // Live latest: Title links to live-event page
         const titleHref = `live-event.html?id=${encodeURIComponent(latest.id)}`;
         html = `<h2 class="kicker"><a href="${titleHref}">${escapeHtml(latest.title)}</a></h2>
                 <div class="meta-small">${latest.date || ''} ・ ${escapeHtml(latest.venue||'')}</div>
@@ -591,7 +581,6 @@ const main = (function () {
   // ---- Music list / track page ----
   async function renderMusicList(containerSelector) {
     try {
-      // Load music and discography concurrently
       const [musicData, discographyData] = await Promise.all([
         fetchJSON('music'),
         fetchJSON('discography').catch(() => ({ items: [] }))
@@ -600,7 +589,6 @@ const main = (function () {
       const items = sortByDateDesc(musicData.items || musicData);
       const discItems = Array.isArray(discographyData.items) ? discographyData.items : (Array.isArray(discographyData) ? discographyData : []);
 
-      // Build mapping: musicId -> [albums]
       const albumsByMusicId = new Map();
       for (const album of discItems) {
         if (!album || !Array.isArray(album.tracks)) continue;
@@ -623,10 +611,8 @@ const main = (function () {
       if (!container) return;
 
       container.innerHTML = items.map(m => {
-        // Internal albums (from discography) that include this music id
         const internalAlbums = albumsByMusicId.get(m.id) || [];
 
-        // Build HTML for internal albums (links to album.html?id=...)
         let internalHtml = '';
         if (internalAlbums.length > 0) {
           const links = internalAlbums.map(a => {
@@ -638,12 +624,10 @@ const main = (function () {
           internalHtml = `<div class="meta-small">収録アルバム: ${links}</div>`;
         }
 
-        // External albums from music.json -> albums array
         let externalHtml = '';
         if (Array.isArray(m.albums) && m.albums.length > 0) {
           const parts = m.albums.map(a => {
             const s = String(a);
-            // markdown-style link [title](url)
             const md = s.match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
             if (md) {
               const title = escapeHtml(md[1].trim());
@@ -655,7 +639,6 @@ const main = (function () {
           externalHtml = `<div class="meta-small">収録アルバム (外部): ${parts.join(' ・ ')}</div>`;
         }
 
-        // existing UI (cover, title, meta, audio/note)
         const coverHtml = `<img src="${thumbOrPlaceholder(m.cover,96,96)}" alt="" class="thumb">`;
         const titleHref = `track.html?id=${encodeURIComponent(m.id)}`;
         const dateAndDuration = `リリース: ${m.date || ''} ・ ${escapeHtml(m.duration || '')}`;
@@ -689,30 +672,19 @@ const main = (function () {
       const item = items.find(x => x.id === id);
       if (!item) { container.innerHTML = '<p>曲が見つかりません。</p>'; return; }
 
-      // If lyrics are in external file, fetch it. Support item.lyricsFile (relative to baseAssets) or absolute URL.
       let lyricsText = item.lyrics || '';
       if (item.lyricsFile) {
-        try {
-          lyricsText = await fetchText(item.lyricsFile);
-        } catch (e) {
-          console.warn('Failed to load lyrics file', item.lyricsFile, e);
-          // fallback: keep item.lyrics if any
-          lyricsText = item.lyrics || '';
-        }
+        try { lyricsText = await fetchText(item.lyricsFile); } catch (e) { lyricsText = item.lyrics || ''; }
       }
 
-      // Find related MV(s) by musicID
       const moviesData = await fetchJSON('movies').catch(()=>({items:[]}));
       const relatedMovies = findMoviesByMusicId(moviesData.items || [], item.id);
 
       const relatedMVHtml = (relatedMovies || []).map(mv => {
-        // link to movie list page anchored to the item so it scrolls into view
         const anchor = `movie.html#movie-${encodeURIComponent(mv.id)}`;
         return `<li><a href="${anchor}">${escapeHtml(mv.title)}</a>（${escapeHtml(mv.date||'')}）</li>`;
       }).join('');
 
-      // --- NEW: build internal/external album lists for the track page ---
-      // Internal: find albums in discography that include this music id
       const discographyData = await fetchJSON('discography').catch(()=>({items:[]}));
       const discItems = Array.isArray(discographyData.items) ? discographyData.items : (Array.isArray(discographyData) ? discographyData : []);
       const internalAlbums = (discItems || []).filter(album => {
@@ -741,7 +713,6 @@ const main = (function () {
         internalHtml = `<div class="meta-small">収録アルバム: ${links}</div>`;
       }
 
-      // External albums: from item.albums (music.json)
       let externalHtml = '';
       if (Array.isArray(item.albums) && item.albums.length > 0) {
         const parts = item.albums.map(a => {
@@ -756,9 +727,7 @@ const main = (function () {
         });
         externalHtml = `<div class="meta-small">収録アルバム (外部): ${parts.join(' ・ ')}</div>`;
       }
-      // --- END album lists ---
 
-      // render page with lyrics, MV links, and album info
       container.innerHTML = `
         <article class="card">
           <h2 id="track-${escapeHtml(item.id)}">${escapeHtml(item.title)}</h2>
@@ -796,7 +765,6 @@ const main = (function () {
       if (!container) return;
       const html = items.map(m => {
         try {
-          // Collect candidate musicID references from new fields
           const relatedCandidates = [];
           if (m.musicID) relatedCandidates.push(m.musicID);
           if (Array.isArray(m.musicIDs)) m.musicIDs.forEach(t => relatedCandidates.push(t));
@@ -806,7 +774,6 @@ const main = (function () {
             });
           }
 
-          // Only create links when movie-provided musicID matches a music.id (exact or case-insensitive).
           const relatedLinks = (relatedCandidates || []).map(ref => {
             const refItem = findMusicById(musicData.items || [], ref);
             if (refItem) return `<a href="track.html?id=${refItem.id}">${escapeHtml(refItem.title)}</a>`;
@@ -815,10 +782,8 @@ const main = (function () {
 
           const linksHtml = relatedLinks.length ? `<p class="meta-small">関連曲: ${relatedLinks.join(' ・ ')}</p>` : '';
 
-          // add id to container so other pages can link to movie.html#movie-<id>
           const itemIdAttr = `movie-${escapeHtml(m.id)}`;
 
-          // Title should link to video (or external url) if available, otherwise to movie page
           const titleHref = m.video || m.url || `movie.html?id=${m.id}`;
           const titleHrefEncoded = encodeURI(String(titleHref));
 
@@ -839,7 +804,6 @@ const main = (function () {
         }
       }).join('');
       container.innerHTML = html;
-      // after list rendered, ensure highlight for current hash (if any)
       try { setTimeout(highlightMovieByHash, 50); } catch (_) {}
     } catch (e) {
       console.error('renderMovieList error', e);
@@ -868,7 +832,6 @@ const main = (function () {
         });
       }
 
-      // Only create links for ID matches
       const relatedHtml = (relatedCandidates || []).map(ref => {
         const refItem = findMusicById(musicData.items || [], ref);
         if (refItem) return `<li><a href="track.html?id=${refItem.id}">${escapeHtml(refItem.title)}</a></li>`;
@@ -930,7 +893,6 @@ const main = (function () {
       const album = items.find(x => x.id === id);
       if (!album) { container.innerHTML = '<p>アルバムが見つかりません。</p>'; return; }
 
-      // Set body flag so CSS can target album page reliably (clear previous)
       try {
         document.body.removeAttribute('data-album-id');
         document.body.classList.remove('album-page');
@@ -945,7 +907,6 @@ const main = (function () {
       const musicData = await fetchJSON('music').catch(()=>({items:[]}));
       const tracks = album.tracks || [];
       const trackHtml = tracks.map(t => {
-        // Prefer new field musicID on track entries but handle many formats
         let musicRefId = null;
         if (!t) return '';
         if (typeof t === 'string') {
@@ -964,8 +925,6 @@ const main = (function () {
         if (musicRefId) {
           const trackRef = (musicData.items || []).find(m => m.id === musicRefId || (m.id && String(m.id).toLowerCase() === String(musicRefId).toLowerCase()));
           if (trackRef) {
-            // IMPORTANT: prefer album-provided 'author' on the track entry.
-            // If author is not provided, do NOT fall back to other credit fields — show nothing.
             let composerText = '';
             if (t && typeof t === 'object' && t.author) {
               composerText = t.author;
@@ -975,7 +934,6 @@ const main = (function () {
           }
         }
 
-        // fallback: show provided title and prefer 'author' field on album track entries only
         const titleText = (typeof t === 'object' && t.title) ? t.title : ((typeof t === 'string') ? '' : '');
         const authorText = (typeof t === 'object' && t.author) ? t.author : '';
         return `<li>${escapeHtml(trackNo)}. ${escapeHtml(titleText)}${authorText ? ' — ' + escapeHtml(authorText) : ''}</li>`;
