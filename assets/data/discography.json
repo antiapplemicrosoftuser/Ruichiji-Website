@@ -1,5 +1,17 @@
 {
   "items" : [ {
+    "id" : "single0001-hamo_reason",
+    "title" : "HAMO Reason",
+    "date" : "2025-10-26",
+    "description" : "Ruichiji 1st Single\n5パートのボーカルの有無全てのパターンを収録\n一人でも、誰とでも歌えます。",
+    "cover" : "https://pbs.twimg.com/media/G33DCpzW0AAb4Fj?format=png&name=medium",
+    "artists" : [ "Ruichiji" ],
+    "tracks" : [ {
+      "title" : "HAMO Reason",
+      "musicID" : "20251026-hamo_reason",
+      "author" : "Ruichiji"
+    } ]
+  }, {
     "id" : "album0002-trashbox_vocaledition",
     "title" : "Trash Box Vocal Edition",
     "date" : "2025-10-26",
