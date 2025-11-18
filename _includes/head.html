@@ -1,0 +1,110 @@
+<!-- _includes/head.html - Head meta + Open Graph + Twitter Card for Jekyll (GitHub Pages, subpath-safe) -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+{%- comment -%}
+  Meta values resolution order:
+  - title: page.title -> site.title
+  - description: page.description -> page.excerpt -> site.description
+  - og_image: page.og_image -> page.image -> site.social_image -> default-cover.svg
+  Ensure you set `url` in _config.yml (e.g. https://username.github.io) so absolute_url works correctly on GitHub Pages subpath.
+{%- endcomment -%}
+
+{%- assign meta_title = page.title | default: site.title -%}
+{%- assign meta_site_title = site.title | default: "Ruichiji - Official Website" -%}
+{%- assign meta_description = page.description | default: page.excerpt | default: site.description | default: "Ruichiji - Official Website" -%}
+
+{%- comment -%}
+  Prefer explicit page.og_image in front-matter; otherwise fall back to page.image, site.social_image, or repository default.
+  Use absolute_url so GitHub Pages subpath is handled correctly.
+{%- endcomment -%}
+{%- assign meta_image_path =
+  page.og_image
+  | default: page.image
+  | default: site.social_image
+  | default: "/assets/images/default-cover.svg"
+-%}
+{%- assign meta_image = meta_image_path | absolute_url -%}
+
+{%- assign canonical = page.url | absolute_url -%}
+
+<title>{% if page.title %}{{ page.title }} | {{ meta_site_title }}{% else %}{{ meta_site_title }}{% endif %}</title>
+<link rel="canonical" href="{{ canonical }}" />
+
+<meta name="description" content="{{ meta_description | strip_newlines | strip_html | truncate: 200 }}" />
+
+<!-- Favicon / touch icons -->
+<link rel="icon" href="{{ '/assets/images/default-cover.svg' | absolute_url }}" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="{{ '/assets/images/default-cover.svg' | absolute_url }}" />
+
+<!-- Open Graph -->
+<meta property="og:site_name" content="{{ meta_site_title }}" />
+{%- if page.layout == "post" or page.collection == "posts" -%}
+  <meta property="og:type" content="article" />
+{%- else -%}
+  <meta property="og:type" content="website" />
+{%- endif -%}
+<meta property="og:title" content="{{ meta_title | escape }}" />
+<meta property="og:description" content="{{ meta_description | strip_html | strip_newlines | truncate: 300 }}" />
+<meta property="og:url" content="{{ canonical }}" />
+<meta property="og:image" content="{{ meta_image }}" />
+<meta property="og:image:alt" content="{{ meta_site_title }}" />
+<meta property="og:locale" content="{{ site.locale | default: 'en_US' }}" />
+
+{%- if page.layout == "post" or page.collection == "posts" -%}
+  {%- if page.date -%}
+    <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}" />
+  {%- endif -%}
+  {%- if page.last_modified_at or page.updated -%}
+    <meta property="article:modified_time" content="{{ page.last_modified_at | default: page.updated | date_to_xmlschema }}" />
+  {%- endif -%}
+  {%- if page.author or site.author -%}
+    {%- assign og_author = page.author | default: site.author -%}
+    <meta property="article:author" content="{{ og_author }}" />
+  {%- endif -%}
+{%- endif -%}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ meta_title | escape }}" />
+<meta name="twitter:description" content="{{ meta_description | strip_html | strip_newlines | truncate: 300 }}" />
+<meta name="twitter:image" content="{{ meta_image }}" />
+{%- if site.twitter_username -%}
+  <meta name="twitter:site" content="@{{ site.twitter_username | remove: '@' }}" />
+  <meta name="twitter:creator" content="@{{ page.author_twitter | default: site.twitter_username | remove: '@' }}" />
+{%- endif -%}
+
+{%- comment -%}
+  Structured data (WebSite) — minimal JSON-LD to improve rich previews/search engines.
+  If you have a site.logo property, replace the image value accordingly.
+{%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "url": "{{ site.url | default: ( '/' | absolute_url ) }}",
+  "name": "{{ meta_site_title | escape }}",
+  "description": "{{ meta_description | strip_html | strip_newlines | truncate: 300 | escape }}",
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ meta_site_title | escape }}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ meta_image }}",
+      "width": 1200,
+      "height": 630
+    }
+  }
+}
+</script>
+
+{%- comment -%}
+  Notes:
+  - SVG may not be supported as og:image by all services (Facebook historically prefers PNG/JPEG).
+    If you find previews are missing or blank, generate a PNG (1200x630) and set site.social_image to that PNG
+    (or set page.og_image per-page). Example in _config.yml:
+      social_image: "/assets/images/social-default.png"
+  - For GitHub Pages subpath (user.github.io/Ruichiji-Website), absolute_url requires `url` in _config.yml:
+      url: "https://<your-username>.github.io/Ruichiji-Website"
+    and you can also set baseurl if you use one. absolute_url will honor those settings.
+{%- endcomment -%}
