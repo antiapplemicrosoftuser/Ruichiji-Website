@@ -492,7 +492,54 @@ const main = (function () {
         return `<li><a href="${anchor}">${escapeHtml(mv.title)}</a>（${escapeHtml(mv.date||'')}）</li>`;
       }).join('');
 
-      // render page with lyrics and MV links
+      // --- NEW: build internal/external album lists for the track page ---
+      // Internal: find albums in discography that include this music id
+      const discographyData = await fetchJSON('discography').catch(()=>({items:[]}));
+      const discItems = Array.isArray(discographyData.items) ? discographyData.items : (Array.isArray(discographyData) ? discographyData : []);
+      const internalAlbums = (discItems || []).filter(album => {
+        if (!album || !Array.isArray(album.tracks)) return false;
+        return album.tracks.some(t => {
+          if (!t) return false;
+          if (typeof t === 'string') return String(t) === String(item.id);
+          if (typeof t === 'object') {
+            const keys = ['musicID','musicId','music_id','id','track','track_id'];
+            for (const k of keys) {
+              if (Object.prototype.hasOwnProperty.call(t, k) && t[k] && String(t[k]) === String(item.id)) return true;
+            }
+          }
+          return false;
+        });
+      });
+
+      let internalHtml = '';
+      if (internalAlbums.length > 0) {
+        const links = internalAlbums.map(a => {
+          const aid = a.id ? encodeURIComponent(a.id) : '';
+          const text = escapeHtml(a.title || a.id || '（無題のアルバム）');
+          const href = aid ? `album.html?id=${aid}` : 'discography.html';
+          return `<a href="${href}">${text}</a>`;
+        }).join(' ・ ');
+        internalHtml = `<div class="meta-small">収録アルバム: ${links}</div>`;
+      }
+
+      // External albums: from item.albums (music.json)
+      let externalHtml = '';
+      if (Array.isArray(item.albums) && item.albums.length > 0) {
+        const parts = item.albums.map(a => {
+          const s = String(a);
+          const md = s.match(/^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/);
+          if (md) {
+            const title = escapeHtml(md[1].trim());
+            const url = md[2].trim();
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>`;
+          }
+          return escapeHtml(s);
+        });
+        externalHtml = `<div class="meta-small">収録アルバム (外部): ${parts.join(' ・ ')}</div>`;
+      }
+      // --- END album lists ---
+
+      // render page with lyrics, MV links, and album info
       container.innerHTML = `
         <article class="card">
           <h2 id="track-${escapeHtml(item.id)}">${escapeHtml(item.title)}</h2>
@@ -511,10 +558,10 @@ const main = (function () {
             <h3>Lyrics</h3>
             <div class="content" id="lyrics-content">${nl2br(escapeHtml(lyricsText || '歌詞は未設定です。'))}</div>
           </section>
-          <section>
-            <h3>収録アルバム</h3>
-            <ul>${(item.albums||[]).map(aId=>`<li><a href="album.html?id=${encodeURIComponent(aId)}">${escapeHtml(aId)}</a></li>`).join('') || '<li>収録アルバムはありません。</li>'}</ul>
-          </section>
+
+          ${internalHtml ? `<section><h3>収録アルバム</h3>${internalHtml}</section>` : ''}
+          ${externalHtml ? `<section><h3>収録アルバム (外部)</h3>${externalHtml}</section>` : ''}
+
         </article>
       `;
     } catch (e) { console.error('renderTrackPage error', e); }
