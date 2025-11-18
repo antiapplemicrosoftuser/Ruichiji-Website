@@ -114,9 +114,10 @@ h1,h2,h3,h4,h5,h6 {
 .main-nav .social-link svg { display:block; width:18px; height:18px; }
 .main-nav .social-link:hover { color:var(--accent); background: rgba(100,181,246,0.04); transform: translateY(-1px); }
 
-/* ハンバーガーボタン（デフォルトは非表示、モバイルで表示） */
+/* ハンバーガーボタン（デフォルトは非表示、モバイルで表示）
+   修正: 表示時に縦積みになるよう flex-direction: column を指定 */
 .hamburger {
-  display: none;
+  display: none; /* shown on mobile via @media */
   appearance: none;
   -webkit-appearance: none;
   border: 0;
@@ -125,6 +126,10 @@ h1,h2,h3,h4,h5,h6 {
   padding: .4rem;
   border-radius: 6px;
   cursor: pointer;
+
+  /* make the button a column flex container so the three bars stack vertically */
+  display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -134,13 +139,13 @@ h1,h2,h3,h4,h5,h6 {
   border-radius: 6px;
 }
 
-/* three-bar icon lines */
+/* three-bar icon lines — each is a horizontal short bar; stacked vertically by parent */
 .hamburger .bar {
   display:block;
-  width:18px;
+  width:24px;     /* adjust length of each bar (長さは必要に応じて調整してください) */
   height:2px;
   background:currentColor;
-  margin:3px 0;
+  margin:4px 0;   /* vertical spacing between bars */
   border-radius:2px;
 }
 
