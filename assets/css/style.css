@@ -81,11 +81,37 @@ h1,h2,h3,h4,h5,h6 {
   display: inline-block;
 }
 
+/* social icon links in header */
+.main-nav .social-link {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  text-decoration:none;
+  padding:.3rem .45rem;
+  border-radius:6px;
+  transition: color .12s, background-color .12s, transform .06s;
+  margin-right: 0.25rem;
+}
+.main-nav .social-link svg { display:block; width:18px; height:18px; }
+.main-nav .social-link:hover { color:var(--accent); background: rgba(100,181,246,0.04); transform: translateY(-1px); }
+
 /* ホーム専用リストの区切り・余白 */
 #home-list {
   margin-top: 0.25rem;
 }
 #home-list ul { padding: 0; margin: 0; }
+
+/* Home top contact notice */
+.home-contact {
+  background: linear-gradient(180deg, rgba(100,181,246,0.03), rgba(100,181,246,0.01));
+  border: 1px solid rgba(100,181,246,0.05);
+  color: var(--muted-2);
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+  font-size: 0.98rem;
+}
 
 /* 各項目のベーススタイル（枠無し、薄い区切り） */
 #home-list .item {

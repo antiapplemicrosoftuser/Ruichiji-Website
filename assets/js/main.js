@@ -124,10 +124,85 @@ const main = (function () {
     }
   }
 
+  // === NEW: insert social icons and home contact notice ===
+  function insertHeaderSocialLinks() {
+    const nav = document.querySelector('.main-nav');
+    if (!nav) return;
+
+    // Avoid duplicate insertion
+    if (nav.querySelector('.social-link-x') || nav.querySelector('.social-link-nico')) return;
+
+    // X (Twitter) link
+    const aX = document.createElement('a');
+    aX.href = 'https://x.com/ruichiji';
+    aX.target = '_blank';
+    aX.rel = 'noopener noreferrer';
+    aX.className = 'social-link social-link-x';
+    aX.title = 'X / ruichiji';
+    aX.setAttribute('aria-label', 'X ruichiji');
+    aX.innerHTML = `
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M5 4.5c.9.4 1.7.6 2.6.7-1 .6-1.8 1.5-2.1 2.8.7-.4 1.5-.6 2.3-.5-1 .7-1.6 1.7-1.6 2.9 0 .9.3 1.7.9 2.3 1-.1 1.8-.6 2.4-1.2.5.1 1 .1 1.6.1C11 17 8.6 18 6 18c-2.2 0-3.9-.8-4.9-1.8.7.1 1.4.1 2.1 0C2.5 15 1.6 14 1.6 12.6c0-.1 0-.2 0-.3 0-1.2.6-2.4 1.7-3.2C3 8.6 3.8 8 4.7 7.6 4 7.7 3.3 7.9 2.6 8.3 3.6 8 4.4 7.6 5 7c.8-.8 1.8-1.3 2.9-1.5z"/>
+      </svg>
+    `;
+
+    // Nico link
+    const aNico = document.createElement('a');
+    aNico.href = 'https://www.nicovideo.jp/user/134010373';
+    aNico.target = '_blank';
+    aNico.rel = 'noopener noreferrer';
+    aNico.className = 'social-link social-link-nico';
+    aNico.title = 'ニコニコ動画';
+    aNico.setAttribute('aria-label', 'ニコニコ動画');
+    aNico.innerHTML = `
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M4 7v8c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2zm5 5H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
+      </svg>
+    `;
+
+    // Insert icons at the beginning of nav
+    if (nav.firstChild) {
+      nav.insertBefore(aNico, nav.firstChild);
+      nav.insertBefore(aX, nav.firstChild);
+    } else {
+      nav.appendChild(aX);
+      nav.appendChild(aNico);
+    }
+  }
+
+  function insertHomeTopNotice() {
+    // Add notice to top of home page (index)
+    const path = location.pathname || '/';
+    const isHome = path === '/' || path.endsWith('/index.html') || path.endsWith('/index.htm');
+    if (!isHome) return;
+    const mainContainer = document.querySelector('main.container') || document.querySelector('.container');
+    if (!mainContainer) return;
+
+    // Avoid duplicate
+    if (document.querySelector('.home-contact')) return;
+
+    const notice = document.createElement('div');
+    notice.className = 'home-contact';
+    notice.innerHTML = `
+      <p>ご連絡はXかDiscordでお願いします。<br>Discord: <strong>ruichiji</strong></p>
+    `;
+    // Insert at the top of main.container
+    mainContainer.insertBefore(notice, mainContainer.firstChild);
+  }
+  // === END NEW social / notice functions ===
+
   window.addEventListener('DOMContentLoaded', function () {
     adjustHeaderSpacing();
     handleInitialHash();
     attachInternalLinkHandler();
+
+    // insert social icons and homepage notice after DOM ready
+    try {
+      insertHeaderSocialLinks();
+      insertHomeTopNotice();
+    } catch (e) {
+      console.debug('insertHeaderSocialLinks/insertHomeTopNotice failed', e);
+    }
   });
   window.addEventListener('resize', adjustHeaderSpacing);
 
