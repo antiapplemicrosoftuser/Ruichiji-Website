@@ -312,7 +312,7 @@ const main = (function () {
           </div>
           <div style="overflow:hidden;">
             <div class="kicker"><a href="album.html?id=${encodeURIComponent(latest.id)}">${escapeHtml(latest.title)}</a></div>
-            <div class="meta-small">参加: ${escapeHtml((latest.artists||[]).join(', '))}</div>
+            <div class="meta-small">参加アーティスト: ${escapeHtml((latest.artists||[]).join(', '))}</div>
             <p>${escapeHtml(latest.description||'（説明未設定）')}</p>
           </div>
           <div style="clear:both"></div>`;
@@ -721,7 +721,7 @@ const main = (function () {
             <img src="${thumbOrPlaceholder(album.cover,200,200)}" alt="${escapeHtml(album.title || '')}" class="thumb">
             <div>
               <h2 id="album-${escapeHtml(album.id)}">${escapeHtml(album.title)}</h2>
-              <div class="meta-small">参加: ${escapeHtml((album.artists||[]).join(', ') || '未設定')}</div>
+              <div class="meta-small">参加アーティスト: ${escapeHtml((album.artists||[]).join(', ') || '未設定')}</div>
               <div class="meta-small">リリース: ${album.date || ''}</div>
               <p>${escapeHtml(album.description || '')}</p>
             </div>

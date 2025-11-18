@@ -187,25 +187,7 @@ body[data-album-id] .card .thumb {
 /* 個別ページ内で横並びレイアウトの場合にサムネを左に寄せる補助 */
 body[data-album-id] .card > div { display: flex; gap: 1rem; align-items: flex-start; }
 
-/* 小さい画面ではサイズを小さくする */
-@media (max-width: 920px) {
-  body[data-album-id] .card img.thumb,
-  body[data-album-id] .card .thumb {
-    width: 240px;
-    height: 240px;
-  }
-}
-@media (max-width: 520px) {
-  body[data-album-id] .card img.thumb,
-  body[data-album-id] .card .thumb {
-    width: 100%;
-    height: auto;
-    max-height: 360px;
-    border-radius: 8px;
-  }
-}
-
-/* === album-page 用: 個別アルバムページのカバーを大きく表示（.album-page クラス対応） === */
+/* album-page 用: 個別アルバムページのカバーを大きく表示（.album-page クラス対応） */
 .album-page .card img.thumb,
 .album-page .card .thumb {
   width: 320px;
@@ -219,21 +201,37 @@ body[data-album-id] .card > div { display: flex; gap: 1rem; align-items: flex-st
 /* Album page レイアウト補助（横並びにする等） */
 .album-page .card > div { display: flex; gap: 1rem; align-items: flex-start; }
 
-/* レスポンシブ */
+/* レスポンシブ: タブレット / モバイル用の縮小と縦並び対応 */
 @media (max-width: 920px) {
   .album-page .card img.thumb,
-  .album-page .card .thumb {
-    width: 240px;
-    height: 240px;
+  .album-page .card .thumb,
+  body[data-album-id] .card img.thumb,
+  body[data-album-id] .card .thumb {
+    width: 240px !important;
+    height: 240px !important;
   }
 }
+
+/* モバイルではジャケットを上、テキストを下に縦並びにする */
 @media (max-width: 520px) {
   .album-page .card img.thumb,
-  .album-page .card .thumb {
-    width: 100%;
-    height: auto;
-    max-height: 360px;
-    border-radius: 8px;
+  .album-page .card .thumb,
+  body[data-album-id] .card img.thumb,
+  body[data-album-id] .card .thumb {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 360px !important;
+    border-radius: 8px !important;
+    margin-bottom: 0.6rem;
+  }
+
+  /* stacked layout: image on top, then title / artists / description */
+  .album-page .card > div,
+  body[data-album-id] .card > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: flex-start;
   }
 }
 
