@@ -24,7 +24,7 @@
   </header>
 
   <main class="container">
-    <!-- Inserted static home-top notice (moved from JS to HTML) -->
+    <!-- Static home-top notice -->
     <div class="home-contact" role="note" aria-label="連絡先案内">
       <p>ご連絡はXかDiscordでお願いします。<br>Discord: <strong>ruichiji</strong></p>
     </div>
@@ -44,6 +44,9 @@
         <li id="latest-album">
           <!-- loadLatest('discography') will populate -->
         </li>
+        <li id="latest-live">
+          <!-- loadLatest('live') will populate -->
+        </li>
       </ul>
     </section>
 
@@ -56,13 +59,13 @@
 
   <script src="assets/js/main.js"></script>
   <script>
-    // initialize home widgets (if your templates call these directly)
+    // initialize home widgets
     if (window.main && typeof window.main.loadLatest === 'function') {
-      // load top widgets
       try { main.loadLatest('topics', '#latest-topics', 'topic.html?id='); } catch (e) {}
       try { main.loadLatest('music', '#latest-music', 'track.html?id='); } catch (e) {}
       try { main.loadLatest('movies', '#latest-movies', 'movie.html?id='); } catch (e) {}
       try { main.loadLatest('discography', '#latest-album', 'album.html?id='); } catch (e) {}
+      try { main.loadLatest('live', '#latest-live', 'live-event.html?id='); } catch (e) {}
     }
   </script>
 </body>

@@ -124,21 +124,6 @@ const main = (function () {
     }
   }
 
-  window.addEventListener('DOMContentLoaded', function () {
-    adjustHeaderSpacing();
-    handleInitialHash();
-    attachInternalLinkHandler();
-
-    // insert social icons after DOM ready
-    try {
-      insertHeaderSocialLinks();
-      // Note: home-top notice is now handled statically in index.html, so we don't insert it here.
-    } catch (e) {
-      console.debug('insertHeaderSocialLinks failed', e);
-    }
-  });
-  window.addEventListener('resize', adjustHeaderSpacing);
-
   // === insert social links in header (X / niconico) ===
   function insertHeaderSocialLinks() {
     const nav = document.querySelector('.main-nav');
@@ -195,6 +180,21 @@ const main = (function () {
     }
   }
   // === end insert social links ===
+
+  window.addEventListener('DOMContentLoaded', function () {
+    adjustHeaderSpacing();
+    handleInitialHash();
+    attachInternalLinkHandler();
+
+    // insert social icons after DOM ready
+    try {
+      insertHeaderSocialLinks();
+      // home-top notice is handled statically in index.html
+    } catch (e) {
+      console.debug('insertHeaderSocialLinks failed', e);
+    }
+  });
+  window.addEventListener('resize', adjustHeaderSpacing);
 
   // -------------------------
   // データ読み込み・レンダリング関数群
@@ -350,25 +350,25 @@ const main = (function () {
       if (kind === 'topics') {
         // Title links to the topic individual page, and link text changed to Topic一覧へ (link to topics list page)
         const titleHref = `topic.html?id=${encodeURIComponent(latest.id)}`;
-        html = `<div class="kicker"><a href="${titleHref}">${escapeHtml(latest.title)}</a></div>
+        html = `<h2 class="kicker"><a href="${titleHref}">${escapeHtml(latest.title)}</a></h2>
                 <div class="meta-small">${latest.date || ''}</div>
-                <p>${escapeHtml(truncate(latest.content || '', 140))}</p>
-                <a href="topics.html">Topic一覧へ</a>`;
+                <p class="preview">${escapeHtml(truncate(latest.content || '', 140))}</p>
+                <p><a class="more" href="topics.html">Topic一覧へ</a></p>`;
       } else if (kind === 'music') {
         // Title links to the music individual page, and link text changed to Music一覧へ (link to music list page)
         const titleHref = (linkPrefix ? linkPrefix : 'track.html?id=') + encodeURIComponent(latest.id);
-        html = `<div class="kicker"><a href="${titleHref}">${escapeHtml(latest.title)}</a></div>
+        html = `<h2 class="kicker"><a href="${titleHref}">${escapeHtml(latest.title)}</a></h2>
                 <div class="meta-small">リリース: ${latest.date || ''}</div>
-                ${latest.audio ? `<audio controls src="${latest.audio}"></audio>` : `<p>${escapeHtml(truncate(latest.note||'',120))}</p>`}
-                <p><a href="music.html">Music一覧へ</a></p>`;
+                ${latest.audio ? `<audio controls src="${latest.audio}"></audio>` : `<p class="preview">${escapeHtml(truncate(latest.note||'',120))}</p>`}
+                <p><a class="more" href="music.html">Music一覧へ</a></p>`;
       } else if (kind === 'movies') {
         // Title links to the video url if available, otherwise to movie page
         const titleHref = latest.video || latest.url || `movie.html?id=${encodeURIComponent(latest.id)}`;
         const titleLink = `<a href="${titleHref}" target="_blank" rel="noopener">${escapeHtml(latest.title)}</a>`;
-        html = `<div class="kicker">${titleLink}</div>
+        html = `<h2 class="kicker">${titleLink}</h2>
                 <div class="meta-small">公開: ${latest.date || ''}</div>
-                ${latest.video ? embedVideoHtml(latest.video) : `<p>${escapeHtml(truncate(latest.description||'',120))}</p>`}
-                <p><a href="movie.html">動画一覧へ</a></p>`;
+                ${latest.video ? embedVideoHtml(latest.video) : `<p class="preview">${escapeHtml(truncate(latest.description||'',120))}</p>`}
+                <p><a class="more" href="movie.html">動画一覧へ</a></p>`;
       } else if (kind === 'discography') {
         html = `
           <div style="float:left;margin-right:12px;text-align:center;">
@@ -376,18 +376,18 @@ const main = (function () {
             <div><a href="discography.html">Discography一覧へ</a></div>
           </div>
           <div style="overflow:hidden;">
-            <div class="kicker"><a href="album.html?id=${encodeURIComponent(latest.id)}">${escapeHtml(latest.title)}</a></div>
+            <h2 class="kicker"><a href="album.html?id=${encodeURIComponent(latest.id)}">${escapeHtml(latest.title)}</a></h2>
             <div class="meta-small">参加アーティスト: ${escapeHtml((latest.artists||[]).join(', '))}</div>
-            <p>${escapeHtml(latest.description||'（説明未設定）')}</p>
+            <p class="preview">${escapeHtml(latest.description||'（説明未設定）')}</p>
           </div>
           <div style="clear:both"></div>`;
       } else if (kind === 'live') {
-        html = `<img src="${thumbOrPlaceholder(latest.image,160,90)}" alt="" class="thumb" style="float:left;margin-right:12px">
-                <div class="kicker"><a href="live-event.html?id=${encodeURIComponent(latest.id)}">${escapeHtml(latest.title)}</a></div>
+        // Live latest: Title links to live-event page
+        const titleHref = `live-event.html?id=${encodeURIComponent(latest.id)}`;
+        html = `<h2 class="kicker"><a href="${titleHref}">${escapeHtml(latest.title)}</a></h2>
                 <div class="meta-small">${latest.date || ''} ・ ${escapeHtml(latest.venue||'')}</div>
-                <p>${escapeHtml(truncate(latest.note||'',120))}</p>
-                <p><a href="live.html">Live一覧へ</a></p>
-                <div style="clear:both"></div>`;
+                <p class="preview">${escapeHtml(truncate(latest.note||'',140))}</p>
+                <p><a class="more" href="live.html">Live一覧へ</a></p>`;
       }
       container.innerHTML = html;
     } catch (e) {
@@ -407,7 +407,7 @@ const main = (function () {
           <div class="meta">${t.date || ''}</div>
           <div>
             <div class="kicker"><a href="topic.html?id=${t.id}">${escapeHtml(t.title)}</a></div>
-            <div>${escapeHtml(truncate(t.content || '', 220))}</div>
+            <div class="preview">${escapeHtml(truncate(t.content || '', 220))}</div>
           </div>
         </div>
       `).join('');
@@ -506,7 +506,7 @@ const main = (function () {
         const titleHref = `track.html?id=${encodeURIComponent(m.id)}`;
         const dateAndDuration = `リリース: ${m.date || ''} ・ ${escapeHtml(m.duration || '')}`;
 
-        const audioOrNote = m.audio ? `<audio controls src="${m.audio}"></audio>` : `<p>${escapeHtml(m.note || '（再生無し）')}</p>`;
+        const audioOrNote = m.audio ? `<audio controls src="${m.audio}"></audio>` : `<p class="preview">${escapeHtml(m.note || '（再生無し）')}</p>`;
 
         return `
         <div class="item">
@@ -674,7 +674,7 @@ const main = (function () {
               <div>
                 <div class="kicker"><a href="${titleHrefEncoded}" target="_blank" rel="noopener">${escapeHtml(m.title)}</a></div>
                 <div class="meta-small">${escapeHtml(m.service || '')} ${escapeHtml(m.uploader||'')}</div>
-                <div style="margin-top:.5rem">${m.video ? embedVideoHtml(m.video) : '<p>リンクのみ</p>'}</div>
+                <div style="margin-top:.5rem">${m.video ? embedVideoHtml(m.video) : '<p class="preview">リンクのみ</p>'}</div>
                 ${linksHtml}
               </div>
             </div>
@@ -726,7 +726,7 @@ const main = (function () {
           <h2 id="movie-${escapeHtml(item.id)}">${escapeHtml(item.title)}</h2>
           <div class="meta-small">公開: ${item.date || ''} ・ ${escapeHtml(item.service || '')} ${escapeHtml(item.uploader || '')}</div>
           <div style="margin-top:.8rem">
-            ${item.video ? embedVideoHtml(item.video) : `<p>${escapeHtml(item.description||'')}</p>`}
+            ${item.video ? embedVideoHtml(item.video) : `<p class="preview">${escapeHtml(item.description||'')}</p>`}
           </div>
 
           ${relatedHtml ? `<section style="margin-top:1rem"><h3>関連曲</h3><ul>${relatedHtml}</ul></section>` : ''}
@@ -757,7 +757,7 @@ const main = (function () {
               <h3><a href="album.html?id=${a.id}">${escapeHtml(a.title)}</a></h3>
               <div class="meta-small">参加アーティスト: ${escapeHtml((a.artists||[]).join(', ') || '未設定')}</div>
               <div class="meta-small">トラック数: ${a.tracks ? a.tracks.length : (a.track_count || '不明')}</div>
-              <p>${escapeHtml(a.description || '')}</p>
+              <p class="preview">${escapeHtml(a.description || '')}</p>
             </div>
           </div>
         </article>
@@ -835,7 +835,7 @@ const main = (function () {
               <h2 id="album-${escapeHtml(album.id)}">${escapeHtml(album.title)}</h2>
               <div class="meta-small">参加アーティスト: ${escapeHtml((album.artists||[]).join(', ') || '未設定')}</div>
               <div class="meta-small">リリース: ${album.date || ''}</div>
-              <p>${escapeHtml(album.description || '')}</p>
+              <p class="preview">${escapeHtml(album.description || '')}</p>
             </div>
           </div>
 
@@ -863,7 +863,7 @@ const main = (function () {
           <div>
             <div class="kicker"><a href="live-event.html?id=${l.id}">${escapeHtml(l.title)}</a></div>
             <div class="meta-small">${l.date || ''} ・ ${escapeHtml(l.venue||'')}</div>
-            <div>${escapeHtml(truncate(l.note||'',140))}</div>
+            <div class="preview">${escapeHtml(truncate(l.note||'',140))}</div>
           </div>
         </div>
       `).join('');
