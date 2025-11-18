@@ -93,6 +93,24 @@ h1,h2,h3,h4,h5,h6 {
   transition: color .12s, background-color .12s, transform .06s;
   margin-right: 0.25rem;
 }
+
+/* Ensure images inside social links are sized consistently by CSS (overrides inline width/height) */
+.main-nav .social-link img {
+  display:block;
+  width:18px;
+  height:18px;
+  object-fit:contain;
+}
+
+/* Make niconico logo slightly larger for better visibility */
+.main-nav .social-link-nico img {
+  width:24px !important;
+  height:24px !important;
+}
+
+/* Optional: slightly larger X logo (if desired) */
+/* .main-nav .social-link-x img { width:20px !important; height:20px !important; } */
+
 .main-nav .social-link svg { display:block; width:18px; height:18px; }
 .main-nav .social-link:hover { color:var(--accent); background: rgba(100,181,246,0.04); transform: translateY(-1px); }
 
