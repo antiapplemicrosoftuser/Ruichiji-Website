@@ -104,8 +104,8 @@ h1,h2,h3,h4,h5,h6 {
 
 /* Make niconico logo slightly larger for better visibility */
 .main-nav .social-link-nico img {
-  width:24px !important;
-  height:24px !important;
+  width:35px !important;
+  height:35px !important;
 }
 
 /* Optional: slightly larger X logo (if desired) */

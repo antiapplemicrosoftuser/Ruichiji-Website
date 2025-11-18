@@ -196,11 +196,14 @@ const main = (function () {
   }
   // === end insert social links ===
 
-  // === insert hamburger toggle for mobile navigation ===
+  // === insert hamburger toggle for mobile navigation (accessible open/close with ESC, close on link, focus management) ===
   function insertHamburgerToggle() {
     const container = document.querySelector('.site-header .container');
     const nav = document.querySelector('.main-nav');
     if (!container || !nav) return;
+
+    // Ensure nav has an id for aria-controls
+    if (!nav.id) nav.id = 'main-nav';
 
     // Avoid duplicate
     if (container.querySelector('.hamburger')) return;
@@ -210,7 +213,7 @@ const main = (function () {
     btn.type = 'button';
     btn.setAttribute('aria-label', 'メニューを開く');
     btn.setAttribute('aria-expanded', 'false');
-    btn.setAttribute('aria-controls', 'main-nav');
+    btn.setAttribute('aria-controls', nav.id);
 
     // three bars
     const bar1 = document.createElement('span'); bar1.className = 'bar';
@@ -221,10 +224,73 @@ const main = (function () {
     // insert button before nav to align with site title
     container.insertBefore(btn, nav);
 
-    // click handler
-    btn.addEventListener('click', function () {
-      const open = document.body.classList.toggle('nav-open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    // state variables for focus management and handlers
+    let previouslyFocused = null;
+    let escHandler = null;
+
+    function getFocusableInNav() {
+      if (!nav) return [];
+      return Array.from(nav.querySelectorAll('a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+        .filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
+    }
+
+    function openNav() {
+      previouslyFocused = document.activeElement;
+      document.body.classList.add('nav-open');
+      btn.setAttribute('aria-expanded', 'true');
+      nav.setAttribute('aria-hidden', 'false');
+
+      // focus first focusable element inside nav (or the nav itself)
+      const focusables = getFocusableInNav();
+      if (focusables.length) focusables[0].focus();
+      else nav.setAttribute('tabindex', '-1'), nav.focus();
+
+      // ESC handler to close
+      escHandler = function (ev) {
+        if (ev.key === 'Escape' || ev.key === 'Esc') {
+          closeNav();
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+    }
+
+    function closeNav() {
+      document.body.classList.remove('nav-open');
+      btn.setAttribute('aria-expanded', 'false');
+      nav.setAttribute('aria-hidden', 'true');
+      // return focus
+      try {
+        if (previouslyFocused && previouslyFocused.focus) previouslyFocused.focus();
+      } catch (e) { /* ignore */ }
+      if (escHandler) {
+        document.removeEventListener('keydown', escHandler);
+        escHandler = null;
+      }
+    }
+
+    // click handler toggles
+    btn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      const isOpen = document.body.classList.toggle('nav-open');
+      if (isOpen) {
+        btn.setAttribute('aria-expanded', 'true');
+        nav.setAttribute('aria-hidden', 'false');
+        // focus first link
+        const f = getFocusableInNav();
+        if (f.length) f[0].focus();
+        // add ESC listener
+        escHandler = function (ev2) {
+          if (ev2.key === 'Escape' || ev2.key === 'Esc') closeNav();
+        };
+        document.addEventListener('keydown', escHandler);
+      } else {
+        btn.setAttribute('aria-expanded', 'false');
+        nav.setAttribute('aria-hidden', 'true');
+        if (escHandler) {
+          document.removeEventListener('keydown', escHandler);
+          escHandler = null;
+        }
+      }
     });
 
     // close nav when clicking outside on mobile
@@ -233,11 +299,21 @@ const main = (function () {
       const target = e.target;
       if (target.closest('.main-nav') || target.closest('.hamburger')) return;
       // clicked outside
-      document.body.classList.remove('nav-open');
-      btn.setAttribute('aria-expanded', 'false');
+      closeNav();
+    });
+
+    // close nav when a link inside nav is activated (mobile-friendly)
+    nav.addEventListener('click', function (e) {
+      const a = e.target.closest('a[href]');
+      if (!a) return;
+      // if it's an anchor to same page hash, let internal handler do scroll; still close nav for mobile
+      closeNav();
     });
 
     // ensure keyboard activation (space/enter handled by default for button)
+    // Make sure nav is marked hidden by default on mobile-capable devices
+    // We keep ARIA attributes consistent:
+    if (!nav.hasAttribute('aria-hidden')) nav.setAttribute('aria-hidden', 'true');
   }
   // === end hamburger ===
 
@@ -251,6 +327,8 @@ const main = (function () {
         document.body.classList.remove('nav-open');
         const btn = document.querySelector('.hamburger');
         if (btn) btn.setAttribute('aria-expanded', 'false');
+        const nav = document.querySelector('.main-nav');
+        if (nav) nav.setAttribute('aria-hidden', 'false');
       }
       lastWidth = w;
     });
