@@ -3,34 +3,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 {%- comment -%}
-  Meta values resolution order:
-  - title: page.title -> site.title
-  - description: page.description -> page.excerpt -> site.description
-  - og_image: page.og_image -> page.image -> site.social_image -> default-cover.svg
-  Ensure you set `url` in _config.yml (e.g. https://username.github.io) so absolute_url works correctly on GitHub Pages subpath.
+  Meta resolution order:
+    title: page.title -> site.title
+    description: page.description -> page.excerpt -> site.description -> fallback
+    og_image: page.og_image -> page.image -> site.social_image -> /assets/images/social-preview.png -> /assets/images/default-cover.svg
+  Make sure you set `url` in _config.yml (for absolute_url to produce correct absolute URLs on GitHub Pages).
 {%- endcomment -%}
 
-{%- assign meta_title = page.title | default: site.title -%}
+{%- assign meta_title = page.title | default: site.title | default: "Ruichiji - Official Website" -%}
 {%- assign meta_site_title = site.title | default: "Ruichiji - Official Website" -%}
 {%- assign meta_description = page.description | default: page.excerpt | default: site.description | default: "Ruichiji - Official Website" -%}
 
 {%- comment -%}
-  Prefer explicit page.og_image in front-matter; otherwise fall back to page.image, site.social_image, or repository default.
-  Use absolute_url so GitHub Pages subpath is handled correctly.
+  Prefer a PNG (1200x630) for social previews. Use site.social_image in _config.yml if available.
 {%- endcomment -%}
-{%- assign meta_image_path =
-  page.og_image
-  | default: page.image
-  | default: site.social_image
-  | default: "/assets/images/default-cover.svg"
--%}
+{%- assign meta_image_path = page.og_image | default: page.image | default: site.social_image | default: "/assets/images/social-preview.png" | default: "/assets/images/default-cover.svg" -%}
 {%- assign meta_image = meta_image_path | absolute_url -%}
-
 {%- assign canonical = page.url | absolute_url -%}
 
 <title>{% if page.title %}{{ page.title }} | {{ meta_site_title }}{% else %}{{ meta_site_title }}{% endif %}</title>
 <link rel="canonical" href="{{ canonical }}" />
-
 <meta name="description" content="{{ meta_description | strip_newlines | strip_html | truncate: 200 }}" />
 
 <!-- Favicon / touch icons -->
@@ -49,7 +41,11 @@
 <meta property="og:url" content="{{ canonical }}" />
 <meta property="og:image" content="{{ meta_image }}" />
 <meta property="og:image:alt" content="{{ meta_site_title }}" />
-<meta property="og:locale" content="{{ site.locale | default: 'en_US' }}" />
+{%- if site.locale -%}
+  <meta property="og:locale" content="{{ site.locale }}" />
+{%- else -%}
+  <meta property="og:locale" content="en_US" />
+{%- endif -%}
 
 {%- if page.layout == "post" or page.collection == "posts" -%}
   {%- if page.date -%}
@@ -75,14 +71,14 @@
 {%- endif -%}
 
 {%- comment -%}
-  Structured data (WebSite) — minimal JSON-LD to improve rich previews/search engines.
-  If you have a site.logo property, replace the image value accordingly.
+  Minimal JSON-LD structured data for improved indexing / rich results.
+  Replace logo URL if you have a dedicated logo file.
 {%- endcomment -%}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "url": "{{ site.url | default: ( '/' | absolute_url ) }}",
+  "url": "{{ site.url | default: '/' | absolute_url }}",
   "name": "{{ meta_site_title | escape }}",
   "description": "{{ meta_description | strip_html | strip_newlines | truncate: 300 | escape }}",
   "publisher": {
@@ -100,11 +96,11 @@
 
 {%- comment -%}
   Notes:
-  - SVG may not be supported as og:image by all services (Facebook historically prefers PNG/JPEG).
-    If you find previews are missing or blank, generate a PNG (1200x630) and set site.social_image to that PNG
-    (or set page.og_image per-page). Example in _config.yml:
-      social_image: "/assets/images/social-default.png"
-  - For GitHub Pages subpath (user.github.io/Ruichiji-Website), absolute_url requires `url` in _config.yml:
+  - GitHub Pages served SVGs are valid files, but many social scrapers (Discord, X/Twitter, Facebook)
+    do not reliably render SVG as og:image. Prefer a PNG or JPEG (1200x630) for og:image/twitter:image.
+  - Ensure _config.yml contains:
       url: "https://<your-username>.github.io/Ruichiji-Website"
-    and you can also set baseurl if you use one. absolute_url will honor those settings.
+      social_image: "/assets/images/social-preview.png"   # optional
+  - If you change the image but the preview doesn't update, change the image URL (e.g. add ?v=timestamp)
+    to force scrapers to refetch.
 {%- endcomment -%}
