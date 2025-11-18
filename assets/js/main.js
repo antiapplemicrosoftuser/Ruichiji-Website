@@ -1,7 +1,22 @@
 // main.js - Header (Jekyll _includes) を使う前提のクライアントロジック
 // dataPath は layout で設定される window.SITE_ASSET_PATH を利用します。
 const main = (function () {
-  const baseAssets = (window && window.SITE_ASSET_PATH) ? window.SITE_ASSET_PATH : 'assets/';
+  // より堅牢な assets ベースパス検出（window.SITE_ASSET_PATH があればそれを使う）
+  let baseAssets = (window && window.SITE_ASSET_PATH) ? window.SITE_ASSET_PATH : null;
+  if (!baseAssets) {
+    // this script is normally assets/js/main.js — それを手掛かりに検出
+    try {
+      const scripts = Array.from(document.getElementsByTagName('script'));
+      const found = scripts.reverse().find(s => s.src && s.src.match(/\/assets\/js\/main(\.js)?(\?.*)?$/));
+      if (found) {
+        const src = found.src;
+        baseAssets = src.replace(/\/assets\/js\/main(\.js)?(\?.*)?$/, '/assets/');
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+  if (!baseAssets) baseAssets = 'assets/';
   const dataPath = baseAssets + 'data/';
 
   // ---- ヘッダー固定に伴う body の padding-top を設定 ----
@@ -181,17 +196,78 @@ const main = (function () {
   }
   // === end insert social links ===
 
+  // === insert hamburger toggle for mobile navigation ===
+  function insertHamburgerToggle() {
+    const container = document.querySelector('.site-header .container');
+    const nav = document.querySelector('.main-nav');
+    if (!container || !nav) return;
+
+    // Avoid duplicate
+    if (container.querySelector('.hamburger')) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'hamburger';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'メニューを開く');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', 'main-nav');
+
+    // three bars
+    const bar1 = document.createElement('span'); bar1.className = 'bar';
+    const bar2 = document.createElement('span'); bar2.className = 'bar';
+    const bar3 = document.createElement('span'); bar3.className = 'bar';
+    btn.appendChild(bar1); btn.appendChild(bar2); btn.appendChild(bar3);
+
+    // insert button before nav to align with site title
+    container.insertBefore(btn, nav);
+
+    // click handler
+    btn.addEventListener('click', function () {
+      const open = document.body.classList.toggle('nav-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    // close nav when clicking outside on mobile
+    document.addEventListener('click', function (e) {
+      if (!document.body.classList.contains('nav-open')) return;
+      const target = e.target;
+      if (target.closest('.main-nav') || target.closest('.hamburger')) return;
+      // clicked outside
+      document.body.classList.remove('nav-open');
+      btn.setAttribute('aria-expanded', 'false');
+    });
+
+    // ensure keyboard activation (space/enter handled by default for button)
+  }
+  // === end hamburger ===
+
+  // close mobile nav when resizing to wide screens
+  function watchResizeForNav() {
+    let lastWidth = window.innerWidth;
+    window.addEventListener('resize', function () {
+      const w = window.innerWidth;
+      if (w > 520 && lastWidth <= 520) {
+        // moving to desktop: ensure nav is visible (remove mobile-open class)
+        document.body.classList.remove('nav-open');
+        const btn = document.querySelector('.hamburger');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      }
+      lastWidth = w;
+    });
+  }
+
   window.addEventListener('DOMContentLoaded', function () {
     adjustHeaderSpacing();
     handleInitialHash();
     attachInternalLinkHandler();
 
-    // insert social icons after DOM ready
+    // insert social icons and mobile hamburger after DOM ready
     try {
       insertHeaderSocialLinks();
-      // home-top notice is handled statically in index.html
+      insertHamburgerToggle();
+      watchResizeForNav();
     } catch (e) {
-      console.debug('insertHeaderSocialLinks failed', e);
+      console.debug('header insertions failed', e);
     }
   });
   window.addEventListener('resize', adjustHeaderSpacing);

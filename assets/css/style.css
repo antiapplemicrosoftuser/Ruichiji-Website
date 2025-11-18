@@ -104,8 +104,8 @@ h1,h2,h3,h4,h5,h6 {
 
 /* Make niconico logo slightly larger for better visibility */
 .main-nav .social-link-nico img {
-  width:35px !important;
-  height:35px !important;
+  width:24px !important;
+  height:24px !important;
 }
 
 /* Optional: slightly larger X logo (if desired) */
@@ -113,6 +113,39 @@ h1,h2,h3,h4,h5,h6 {
 
 .main-nav .social-link svg { display:block; width:18px; height:18px; }
 .main-nav .social-link:hover { color:var(--accent); background: rgba(100,181,246,0.04); transform: translateY(-1px); }
+
+/* ハンバーガーボタン（デフォルトは非表示、モバイルで表示） */
+.hamburger {
+  display: none;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: .4rem;
+  border-radius: 6px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+.hamburger:focus {
+  outline: 3px solid rgba(100,181,246,0.18);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* three-bar icon lines */
+.hamburger .bar {
+  display:block;
+  width:18px;
+  height:2px;
+  background:currentColor;
+  margin:3px 0;
+  border-radius:2px;
+}
+
+/* When nav is open, change hamburger color */
+body.nav-open .hamburger { color: var(--accent); }
 
 /* ホーム専用リストの区切り・余白 */
 #home-list {
@@ -295,9 +328,26 @@ body[data-album-id] .card > div { display: flex; gap: 1rem; align-items: flex-st
 
 /* モバイル調整 */
 @media (max-width:520px){
+  /* Show hamburger on mobile and hide main-nav by default */
+  .hamburger { display: inline-flex; }
+  .main-nav {
+    display: none; /* hidden by default on mobile */
+    width: 100%;
+    flex-direction: column;
+    gap: .25rem;
+    padding-top: .5rem;
+  }
+  /* When open, show as a stacked panel */
+  body.nav-open .main-nav {
+    display: flex;
+  }
+
   #home-list .item { padding: 0.8rem 0; }
   #home-list .item:first-child h2 { font-size: 1.26rem; }
   #home-list h2 { font-size: 1.02rem; }
+
+  /* make social links wrap nicely in mobile nav */
+  .main-nav .social-link { margin-right: 0; }
 }
 
 /* メニューバー */
@@ -402,7 +452,7 @@ main.container{
 }
 @media (max-width:520px){
   :root{--header-height:96px}
-  .site-header .container{flex-direction:column;align-items:flex-start;gap:.5rem;padding:.7rem}
+  .site-header .container{flex-direction:row;align-items:center;gap:.5rem;padding:.7rem} /* keep row so hamburger and brand align */
   .main-nav{margin-left:0;width:100%;gap:.25rem}
   .main-nav a{font-size:.95rem;padding:.5rem .6rem}
   .site-title{font-size:0.98rem}
