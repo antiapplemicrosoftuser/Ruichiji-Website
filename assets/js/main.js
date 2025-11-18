@@ -197,6 +197,8 @@ const main = (function () {
   // === end insert social links ===
 
   // === insert hamburger toggle for mobile navigation (accessible open/close with ESC, close on link, focus management) ===
+  // Note: this function now only creates the hamburger when window.innerWidth <= 520.
+  // If the viewport is wider, any existing hamburger is removed.
   function insertHamburgerToggle() {
     const container = document.querySelector('.site-header .container');
     const nav = document.querySelector('.main-nav');
@@ -205,8 +207,25 @@ const main = (function () {
     // Ensure nav has an id for aria-controls
     if (!nav.id) nav.id = 'main-nav';
 
-    // Avoid duplicate
-    if (container.querySelector('.hamburger')) return;
+    const isMobile = window.innerWidth <= 520;
+
+    // If not mobile, remove any existing hamburger and ensure nav visible
+    if (!isMobile) {
+      const existing = container.querySelector('.hamburger');
+      if (existing) existing.remove();
+      // ensure nav is visible on desktop
+      nav.setAttribute('aria-hidden', 'false');
+      document.body.classList.remove('nav-open');
+      return;
+    }
+
+    // At this point, viewport is mobile: create hamburger only if not present
+    if (container.querySelector('.hamburger')) {
+      // already present — ensure aria states are correct
+      const btn = container.querySelector('.hamburger');
+      btn.setAttribute('aria-expanded', document.body.classList.contains('nav-open') ? 'true' : 'false');
+      return;
+    }
 
     const btn = document.createElement('button');
     btn.className = 'hamburger';
@@ -221,12 +240,11 @@ const main = (function () {
     const bar3 = document.createElement('span'); bar3.className = 'bar';
     btn.appendChild(bar1); btn.appendChild(bar2); btn.appendChild(bar3);
 
-    // insert button to the LEFT of the site title on mobile
+    // insert button to the LEFT of the site title on mobile (per request)
     const siteTitle = container.querySelector('.site-title');
     if (siteTitle) {
       container.insertBefore(btn, siteTitle);
     } else {
-      // fallback: insert before nav (previous behavior)
       container.insertBefore(btn, nav);
     }
 
@@ -325,11 +343,14 @@ const main = (function () {
   }
   // === end hamburger ===
 
-  // close mobile nav when resizing to wide screens
+  // close mobile nav when resizing to wide screens and ensure hamburger presence toggles
   function watchResizeForNav() {
     let lastWidth = window.innerWidth;
     window.addEventListener('resize', function () {
       const w = window.innerWidth;
+      // synchronize hamburger presence/state on resize
+      insertHamburgerToggle();
+
       if (w > 520 && lastWidth <= 520) {
         // moving to desktop: ensure nav is visible (remove mobile-open class)
         document.body.classList.remove('nav-open');
@@ -350,6 +371,7 @@ const main = (function () {
     // insert social icons and mobile hamburger after DOM ready
     try {
       insertHeaderSocialLinks();
+      // Ensure hamburger is only created on mobile, and kept in sync on resize
       insertHamburgerToggle();
       watchResizeForNav();
     } catch (e) {
