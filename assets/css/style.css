@@ -330,24 +330,51 @@ body[data-album-id] .card > div { display: flex; gap: 1rem; align-items: flex-st
 @media (max-width:520px){
   /* Show hamburger on mobile and hide main-nav by default */
   .hamburger { display: inline-flex; }
+
+  /* Enhanced mobile nav behavior:
+     - ensure nav is hidden by default on mobile (use !important to override other rules)
+     - when body.nav-open is present, force show nav (also !important)
+     - position nav as an overlay panel under the header
+  */
   .main-nav {
-    display: none; /* hidden by default on mobile */
+    display: none !important;
     width: 100%;
     flex-direction: column;
     gap: .25rem;
-    padding-top: .5rem;
+    padding: .6rem;
+    background: rgba(6,12,16,0.96);
+    border-top: 1px solid rgba(255,255,255,0.02);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--header-height));
+    z-index: 1100;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
   }
-  /* When open, show as a stacked panel */
+  /* When open, show as a stacked panel (force with !important) */
   body.nav-open .main-nav {
-    display: flex;
+    display: flex !important;
   }
+
+  /* prevent background scrolling when menu open */
+  body.nav-open { overflow: hidden; }
 
   #home-list .item { padding: 0.8rem 0; }
   #home-list .item:first-child h2 { font-size: 1.26rem; }
   #home-list h2 { font-size: 1.02rem; }
 
   /* make social links wrap nicely in mobile nav */
-  .main-nav .social-link { margin-right: 0; }
+  .main-nav .social-link { margin-right: 0; padding: .4rem; }
+
+  /* mobile nav link styles */
+  .main-nav a {
+    display: block;
+    padding: .7rem 1rem;
+    font-size: 1rem;
+    color: var(--text);
+    background: transparent;
+  }
+  .main-nav a:hover { background: rgba(255,255,255,0.02); color:var(--accent); }
 }
 
 /* メニューバー */
