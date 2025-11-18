@@ -251,6 +251,20 @@ body.nav-open .hamburger { color: var(--accent); }
   flex-shrink: 0; /* フレックスレイアウト内でも縮まないように */
 }
 
+/* Make #discography-list display a grid with max 2 columns */
+#discography-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+/* On small screens, fall back to single column */
+@media (max-width: 720px) {
+  #discography-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* card 内のレイアウトが崩れないように、img を左に寄せるルール（既存の inline style と併用されてもOK）*/
 #discography-list .card > div { align-items: center; }
 

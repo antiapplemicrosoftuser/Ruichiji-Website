@@ -932,6 +932,8 @@ const main = (function () {
       const items = sortByDateDesc(data.items || data);
       const container = document.querySelector(containerSelector);
       if (!container) return;
+      // Render cards (container expected to be #discography-list or similar);
+      // CSS will enforce 2-column max layout.
       container.innerHTML = items.map(a => `
         <article class="card">
           <div style="display:flex;gap:1rem;align-items:center;">
@@ -940,7 +942,7 @@ const main = (function () {
               <h3><a href="album.html?id=${a.id}">${escapeHtml(a.title)}</a></h3>
               <div class="meta-small">参加アーティスト: ${escapeHtml((a.artists||[]).join(', ') || '未設定')}</div>
               <div class="meta-small">トラック数: ${a.tracks ? a.tracks.length : (a.track_count || '不明')}</div>
-              <p class="preview">${escapeHtml(a.description || '')}</p>
+              <p class="preview">${escapeHtml(truncate(a.description || '', 180))}</p>
             </div>
           </div>
         </article>
@@ -1018,7 +1020,7 @@ const main = (function () {
               <h2 id="album-${escapeHtml(album.id)}">${escapeHtml(album.title)}</h2>
               <div class="meta-small">参加アーティスト: ${escapeHtml((album.artists||[]).join(', ') || '未設定')}</div>
               <div class="meta-small">リリース: ${album.date || ''}</div>
-              <p class="preview">${escapeHtml(album.description || '')}</p>
+              <div class="content">${nl2br(escapeHtml(album.description || ''))}</div>
             </div>
           </div>
 
