@@ -221,8 +221,14 @@ const main = (function () {
     const bar3 = document.createElement('span'); bar3.className = 'bar';
     btn.appendChild(bar1); btn.appendChild(bar2); btn.appendChild(bar3);
 
-    // insert button before nav to align with site title
-    container.insertBefore(btn, nav);
+    // insert button to the LEFT of the site title on mobile
+    const siteTitle = container.querySelector('.site-title');
+    if (siteTitle) {
+      container.insertBefore(btn, siteTitle);
+    } else {
+      // fallback: insert before nav (previous behavior)
+      container.insertBefore(btn, nav);
+    }
 
     // state variables for focus management and handlers
     let previouslyFocused = null;

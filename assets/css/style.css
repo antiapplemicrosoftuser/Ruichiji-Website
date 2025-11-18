@@ -132,6 +132,7 @@ h1,h2,h3,h4,h5,h6 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin-right: 0.5rem; /* spacing between hamburger and site title */
 }
 .hamburger:focus {
   outline: 3px solid rgba(100,181,246,0.18);
@@ -142,7 +143,7 @@ h1,h2,h3,h4,h5,h6 {
 /* three-bar icon lines — each is a horizontal short bar; stacked vertically by parent */
 .hamburger .bar {
   display:block;
-  width:24px;     /* adjust length of each bar (長さは必要に応じて調整してください) */
+  width:22px;     /* adjust length of each bar (長さは必要に応じて調整してください) */
   height:2px;
   background:currentColor;
   margin:4px 0;   /* vertical spacing between bars */
