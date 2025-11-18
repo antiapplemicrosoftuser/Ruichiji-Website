@@ -124,7 +124,22 @@ const main = (function () {
     }
   }
 
-  // === NEW: insert social icons and home contact notice ===
+  window.addEventListener('DOMContentLoaded', function () {
+    adjustHeaderSpacing();
+    handleInitialHash();
+    attachInternalLinkHandler();
+
+    // insert social icons after DOM ready
+    try {
+      insertHeaderSocialLinks();
+      // Note: home-top notice is now handled statically in index.html, so we don't insert it here.
+    } catch (e) {
+      console.debug('insertHeaderSocialLinks failed', e);
+    }
+  });
+  window.addEventListener('resize', adjustHeaderSpacing);
+
+  // === insert social links in header (X / niconico) ===
   function insertHeaderSocialLinks() {
     const nav = document.querySelector('.main-nav');
     if (!nav) return;
@@ -132,7 +147,7 @@ const main = (function () {
     // Avoid duplicate insertion
     if (nav.querySelector('.social-link-x') || nav.querySelector('.social-link-nico')) return;
 
-    // Use the image paths you provided
+    // Use the image paths provided
     const xLogoPath = '/Ruichiji-Website/assets/images/x-logo.png';
     const nicoLogoPath = '/Ruichiji-Website/assets/images/niconico-logo.png';
 
@@ -179,42 +194,7 @@ const main = (function () {
       nav.appendChild(aNico);
     }
   }
-
-  function insertHomeTopNotice() {
-    // Add notice to top of home page (index)
-    const path = location.pathname || '/';
-    const isHome = path === '/' || path.endsWith('/index.html') || path.endsWith('/index.htm');
-    if (!isHome) return;
-    const mainContainer = document.querySelector('main.container') || document.querySelector('.container');
-    if (!mainContainer) return;
-
-    // Avoid duplicate
-    if (document.querySelector('.home-contact')) return;
-
-    const notice = document.createElement('div');
-    notice.className = 'home-contact';
-    notice.innerHTML = `
-      <p>ご連絡はXかDiscordでお願いします。<br>Discord: <strong>ruichiji</strong></p>
-    `;
-    // Insert at the top of main.container
-    mainContainer.insertBefore(notice, mainContainer.firstChild);
-  }
-  // === END NEW social / notice functions ===
-
-  window.addEventListener('DOMContentLoaded', function () {
-    adjustHeaderSpacing();
-    handleInitialHash();
-    attachInternalLinkHandler();
-
-    // insert social icons and homepage notice after DOM ready
-    try {
-      insertHeaderSocialLinks();
-      insertHomeTopNotice();
-    } catch (e) {
-      console.debug('insertHeaderSocialLinks/insertHomeTopNotice failed', e);
-    }
-  });
-  window.addEventListener('resize', adjustHeaderSpacing);
+  // === end insert social links ===
 
   // -------------------------
   // データ読み込み・レンダリング関数群

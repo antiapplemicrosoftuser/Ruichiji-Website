@@ -1,55 +1,69 @@
----
-layout: default
-title: Home
----
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ruichiji</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="site-title"><a href="index.html">Ruichiji</a></h1>
+      <nav class="main-nav" aria-label="Main navigation">
+        <!-- main-nav items (links) -->
+        <a href="index.html">Home</a>
+        <a href="topics.html">Topic</a>
+        <a href="music.html">Music</a>
+        <a href="movie.html">Movie</a>
+        <a href="discography.html">Discography</a>
+        <a href="live.html">Live</a>
+        <!-- social icons will be inserted by main.js -->
+      </nav>
+    </div>
+  </header>
 
-<section id="home-list" class="list">
-  <ul style="list-style:none;margin:0;padding:0;">
-    <li class="item">
-      <div>
-        <h2><a href="{{ '/topics.html' | relative_url }}">Topics（最新）</a></h2>
-        <div id="latest-topics" class="preview"></div>
-      </div>
-    </li>
+  <main class="container">
+    <!-- Inserted static home-top notice (moved from JS to HTML) -->
+    <div class="home-contact" role="note" aria-label="連絡先案内">
+      <p>ご連絡はXかDiscordでお願いします。<br>Discord: <strong>ruichiji</strong></p>
+    </div>
 
-    <li class="item">
-      <div>
-        <h2><a href="{{ '/music.html' | relative_url }}">Music（最新）</a></h2>
-        <div id="latest-music" class="preview"></div>
-      </div>
-    </li>
+    <!-- Home list container: main.js will populate #home-list -->
+    <section id="home-list">
+      <ul>
+        <li id="latest-topics">
+          <!-- loadLatest('topics') will populate -->
+        </li>
+        <li id="latest-music">
+          <!-- loadLatest('music') will populate -->
+        </li>
+        <li id="latest-movies">
+          <!-- loadLatest('movies') will populate -->
+        </li>
+        <li id="latest-album">
+          <!-- loadLatest('discography') will populate -->
+        </li>
+      </ul>
+    </section>
 
-    <li class="item">
-      <div>
-        <h2><a href="{{ '/movie.html' | relative_url }}">Movie（最新）</a></h2>
-        <div id="latest-movie" class="preview"></div>
-      </div>
-    </li>
+    <!-- other homepage content as needed -->
+  </main>
 
-    <li class="item">
-      <div>
-        <h2><a href="{{ '/discography.html' | relative_url }}">Discography（最新）</a></h2>
-        <div id="latest-album" class="preview"></div>
-      </div>
-    </li>
+  <footer class="site-footer container">
+    <p>© Ruichiji</p>
+  </footer>
 
-    <li class="item">
-      <div>
-        <h2><a href="{{ '/live.html' | relative_url }}">Live（最新）</a></h2>
-        <div id="latest-live" class="preview"></div>
-      </div>
-    </li>
-  </ul>
-</section>
-
-<script>
-  window.addEventListener('DOMContentLoaded', function () {
-    if (window.main) {
-      main.loadLatest('topics', '#latest-topics', 'topic.html?id=');
-      main.loadLatest('music', '#latest-music', 'track.html?id=');
-      main.loadLatest('movies', '#latest-movie', 'movie.html?id=');
-      main.loadLatest('discography', '#latest-album', 'album.html?id=');
-      main.loadLatest('live', '#latest-live', 'live-event.html?id=');
+  <script src="assets/js/main.js"></script>
+  <script>
+    // initialize home widgets (if your templates call these directly)
+    if (window.main && typeof window.main.loadLatest === 'function') {
+      // load top widgets
+      try { main.loadLatest('topics', '#latest-topics', 'topic.html?id='); } catch (e) {}
+      try { main.loadLatest('music', '#latest-music', 'track.html?id='); } catch (e) {}
+      try { main.loadLatest('movies', '#latest-movies', 'movie.html?id='); } catch (e) {}
+      try { main.loadLatest('discography', '#latest-album', 'album.html?id='); } catch (e) {}
     }
-  });
-</script>
+  </script>
+</body>
+</html>
