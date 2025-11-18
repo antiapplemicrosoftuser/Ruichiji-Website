@@ -1,22 +1,7 @@
 // main.js - Header (Jekyll _includes) を使う前提のクライアントロジック
 // dataPath は layout で設定される window.SITE_ASSET_PATH を利用します。
 const main = (function () {
-  // より堅牢な assets ベースパス検出（window.SITE_ASSET_PATH があればそれを使う）
-  let baseAssets = (window && window.SITE_ASSET_PATH) ? window.SITE_ASSET_PATH : null;
-  if (!baseAssets) {
-    // this script is normally assets/js/main.js — それを手掛かりに検出
-    try {
-      const scripts = Array.from(document.getElementsByTagName('script'));
-      const found = scripts.reverse().find(s => s.src && s.src.match(/\/assets\/js\/main(\.js)?(\?.*)?$/));
-      if (found) {
-        const src = found.src;
-        baseAssets = src.replace(/\/assets\/js\/main(\.js)?(\?.*)?$/, '/assets/');
-      }
-    } catch (e) {
-      // ignore
-    }
-  }
-  if (!baseAssets) baseAssets = 'assets/';
+  const baseAssets = (window && window.SITE_ASSET_PATH) ? window.SITE_ASSET_PATH : 'assets/';
   const dataPath = baseAssets + 'data/';
 
   // ---- ヘッダー固定に伴う body の padding-top を設定 ----
@@ -204,7 +189,7 @@ const main = (function () {
     // insert social icons after DOM ready
     try {
       insertHeaderSocialLinks();
-      // ホーム先頭文は index.html に静的に配置したため、ここで挿入しない
+      // home-top notice is handled statically in index.html
     } catch (e) {
       console.debug('insertHeaderSocialLinks failed', e);
     }
@@ -865,8 +850,66 @@ const main = (function () {
     } catch (e) { console.error('renderAlbumPage error', e); }
   }
 
-  // ---- Live list / page (already defined above) ----
-  // (renderLiveList / renderLivePage are present earlier)
+  // ---- Live list / page ----
+  async function renderLiveList(containerSelector) {
+    try {
+      const data = await fetchJSON('live');
+      const items = sortByDateDesc(data.items || data);
+      const container = document.querySelector(containerSelector);
+      if (!container) return;
+      container.innerHTML = items.map(l => `
+        <div class="item">
+          <img src="${thumbOrPlaceholder(l.image,96,96)}" alt="" class="thumb">
+          <div>
+            <div class="kicker"><a href="live-event.html?id=${l.id}">${escapeHtml(l.title)}</a></div>
+            <div class="meta-small">${l.date || ''} ・ ${escapeHtml(l.venue||'')}</div>
+            <div class="preview">${escapeHtml(truncate(l.note||'',140))}</div>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) { console.error('renderLiveList error', e); }
+  }
+
+  async function renderLivePage(containerSelector) {
+    try {
+      const id = qParam('id');
+      const container = document.querySelector(containerSelector);
+      if (!container) return;
+      if (!id) { container.innerHTML = '<p>idが指定されていません。</p>'; return; }
+      const data = await fetchJSON('live');
+      const item = (data.items || data).find(x => x.id === id);
+      if (!item) { container.innerHTML = '<p>ライブ情報が見つかりません。</p>'; return; }
+
+      const musicData = await fetchJSON('music').catch(()=>({items:[]}));
+      const setlistHtml = (item.setlist || []).map((s, idx) => {
+        const found = (musicData.items||[]).find(m => m.id === s.id || m.title === s.title);
+        if (found) {
+          return `<li>${idx+1}. <a href="track.html?id=${encodeURIComponent(found.id)}">${escapeHtml(found.title)}</a></li>`;
+        } else {
+          return `<li>${idx+1}. ${escapeHtml(s.title || s)}</li>`;
+        }
+      }).join('');
+
+      const containerHtml = `
+        <article class="card">
+          <h2 id="live-${escapeHtml(item.id)}">${escapeHtml(item.title)}</h2>
+          <div class="meta-small">${item.date || ''} ・ ${escapeHtml(item.venue || '')}</div>
+          <div style="margin-top:.8rem">
+            <img src="${thumbOrPlaceholder(item.image,700,200)}" alt="" style="width:100%;max-height:300px;object-fit:cover;border-radius:8px">
+          </div>
+          <section style="margin-top:1rem">
+            <h3>説明</h3>
+            <div class="content">${nl2br(escapeHtml(item.note || ''))}</div>
+          </section>
+          <section style="margin-top:1rem">
+            <h3>セットリスト</h3>
+            <ol class="manual-number">${setlistHtml || '<li>セットリスト情報がありません</li>'}</ol>
+          </section>
+        </article>
+      `;
+      container.innerHTML = containerHtml;
+    } catch (e) { console.error('renderLivePage error', e); }
+  }
 
   // Utilities
   function truncate(str, n) {
