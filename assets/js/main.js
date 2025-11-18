@@ -590,7 +590,7 @@ const main = (function () {
           <div class="meta">${t.date || ''}</div>
           <div>
             <div class="kicker"><a href="topic.html?id=${t.id}">${escapeHtml(t.title)}</a></div>
-            <div class="preview">${escapeHtml(truncate(t.content || '', 220))}</div>
+            <div class="preview">${escapeHtml(truncate(t.content || '', 20))}</div>
           </div>
         </div>
       `).join('');
@@ -689,7 +689,7 @@ const main = (function () {
         const titleHref = `track.html?id=${encodeURIComponent(m.id)}`;
         const dateAndDuration = `リリース: ${m.date || ''} ・ ${escapeHtml(m.duration || '')}`;
 
-        const audioOrNote = m.audio ? `<audio controls src="${m.audio}"></audio>` : `<p class="preview">${escapeHtml(m.note || '（再生無し）')}</p>`;
+        const audioOrNote = m.audio ? `<audio controls src="${m.audio}"></audio>` : `<p class="preview">${escapeHtml(truncate(m.note || '', 20) || '（再生無し）')}</p>`;
 
         return `
         <div class="item">
@@ -942,7 +942,7 @@ const main = (function () {
               <h3><a href="album.html?id=${a.id}">${escapeHtml(a.title)}</a></h3>
               <div class="meta-small">参加アーティスト: ${escapeHtml((a.artists||[]).join(', ') || '未設定')}</div>
               <div class="meta-small">トラック数: ${a.tracks ? a.tracks.length : (a.track_count || '不明')}</div>
-              <p class="preview">${escapeHtml(truncate(a.description || '', 180))}</p>
+              <p class="preview">${escapeHtml(truncate(a.description || '', 20))}</p>
             </div>
           </div>
         </article>
@@ -1048,7 +1048,7 @@ const main = (function () {
           <div>
             <div class="kicker"><a href="live-event.html?id=${l.id}">${escapeHtml(l.title)}</a></div>
             <div class="meta-small">${l.date || ''} ・ ${escapeHtml(l.venue||'')}</div>
-            <div class="preview">${escapeHtml(truncate(l.note||'',140))}</div>
+            <div class="preview">${escapeHtml(truncate(l.note||'', 20))}</div>
           </div>
         </div>
       `).join('');
