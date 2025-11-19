@@ -198,8 +198,9 @@ body.nav-open .hamburger { color: var(--accent); }
   font-weight: 700;
 }
 
-/* Topics（最初の項目）の見出しをさらに大きく */
-#home-list .item:first-child h2 {
+/* ---- CHANGED: remove broad first-child rule and use explicit class for outer headings ---- */
+/* Use .section-heading on the outer h2 elements (in index.html) to make them visually larger */
+#home-list .section-heading {
   font-size: 1.36rem; /* 大きめ（要調整可） */
   letter-spacing: 0.2px;
 }
@@ -380,7 +381,8 @@ body[data-album-id] .card > div { display: flex; gap: 1rem; align-items: flex-st
   body.nav-open { overflow: hidden; }
 
   #home-list .item { padding: 0.8rem 0; }
-  #home-list .item:first-child h2 { font-size: 1.26rem; }
+  /* Mobile: apply smaller size to explicit .section-heading (not to inner h2) */
+  #home-list .section-heading { font-size: 1.26rem; }
   #home-list h2 { font-size: 1.02rem; }
 
   /* make social links wrap nicely in mobile nav */
